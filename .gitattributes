@@ -1,0 +1,28 @@
+# Ensure consistent line endings across platforms
+* text=auto
+
+# Python source files — always LF
+*.py text eol=lf
+
+# Docs / config — always LF
+*.md  text eol=lf
+*.txt text eol=lf
+*.cfg text eol=lf
+*.ini text eol=lf
+*.toml text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+
+# Windows scripts get CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary assets — no line-ending conversion, no diffing
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.pdf  binary
+*.zip  binary
+*.db   binary
