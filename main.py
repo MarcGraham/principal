@@ -701,7 +701,7 @@ def show_desktop():
                       lerp_color(c1, '#187018', 0.35), steps=SBH - mid)
         sb.create_line(1, 1, SBW-1, 1, fill='#98e898', width=1)
         sb.create_text(SBW//2, SBH//2, text="⊞  Start",
-                       fill='white', font=('Tahoma', 10, 'bold'))
+                       fill='white', font=('Tahoma', 14, 'bold'))
 
     draw_start()
     sb.bind('<Enter>', lambda e: draw_start(True))
@@ -709,7 +709,7 @@ def show_desktop():
     tb.create_window(6, TBAR_H//2, window=sb, anchor='w')
 
     # System tray clock
-    clk = tk.Label(tb, font=('Tahoma', 9), bg='#c0c0c0',
+    clk = tk.Label(tb, font=('Tahoma', 13), bg='#c0c0c0',
                    fg='#000000', relief=tk.SUNKEN, bd=1, padx=4)
     tb.create_window(SW - 6, TBAR_H//2, window=clk, anchor='e')
     update_clock(clk)
@@ -764,7 +764,7 @@ def show_desktop():
 
     # ── OS watermark ──────────────────────────────────────────────────────────
     shadow_text(wc, SW-18, 15, text="EduOS Professional",
-                font=('Tahoma', 13, 'italic'), fill='white', anchor='ne')
+                font=('Tahoma', 17, 'italic'), fill='white', anchor='ne')
 
     # ── Desktop Icons — dark backdrop pill for guaranteed contrast ─────────────
     # horizon_y / haze_y are not defined in photo mode; set dummies so
@@ -812,7 +812,7 @@ def show_desktop():
                        fill='#555555', width=1)
 
         # Icon button (transparent-looking against dark pill)
-        ib = tk.Button(wc, text=ico, font=('Helvetica', 26),
+        ib = tk.Button(wc, text=ico, font=('Helvetica', 30),
                        bg=PILL_BG, fg=PILL_FG,
                        relief=tk.FLAT, bd=0,
                        activebackground=PILL_HOV,
@@ -824,7 +824,7 @@ def show_desktop():
         ib.bind('<Leave>', lambda e, b=ib: b.config(bg=PILL_BG))
 
         # Label — white text on transparent (pill bg shows through)
-        nl = tk.Label(wc, text=name, font=('Tahoma', 8),
+        nl = tk.Label(wc, text=name, font=('Tahoma', 12),
                       bg=PILL_BG, fg=PILL_FG,
                       justify=tk.CENTER, relief=tk.FLAT, bd=0)
         wc.create_window(ICON_X, iy + ICON_BTN_H + 14,
