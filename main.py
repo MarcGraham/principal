@@ -397,7 +397,7 @@ def open_suspension_list():
 # ─── Detention Log Viewer ─────────────────────────────────────────────────────
 def open_detention_logs():
     """Displays a fake detention log text file with humorous incident reports."""
-    win = StyledWindow(root, "Detention_Logs.txt — Notepad", 580, 500)
+    win = StyledWindow(root, "Detention_Logs.txt — Notepad", 696, 600)
 
     # Notepad-style toolbar
     menubar = tk.Frame(win.content, bg='#f0f0f0', relief=tk.FLAT)
@@ -426,102 +426,73 @@ Academic Year: 2024-25
 Maintained by: Vice Principal Henderson (and his very tired pen)
 ============================================================
 
-DATE:    Mon, Sep 09, 2024 — 3:15 PM
-STUDENT: Tyler Pranksworth, Grade 7
-TEACHER: Mrs. Flannery (History)
-OFFENSE: Drew a moustache on every single face in the history textbook,
-          including the maps. Magellan now has a goatee.
-PUNISHMENT: 1 hour. Must write "I will not redecorate historical figures"
-             100 times. Tried to write it in calligraphy. Points for style,
-             zero for judgment.
+DATE:       Mon, Sep 09, 2024 — 3:15 PM
+STUDENT:    Tyler Pranksworth, Grade 7
+TEACHER:    Mrs. Flannery (History)
+OFFENSE:    Drew a moustache on every single face in the history textbook, including the maps. Magellan now has a goatee.
+PUNISHMENT: 1 hour. Must write "I will not redecorate historical figures" 100 times. Tried to write it in calligraphy. Points for style, zero for judgment.
 ------------------------------------------------------------
 
-DATE:    Wed, Sep 18, 2024 — 3:15 PM
-STUDENT: Cody McSneeze, Grade 6
-TEACHER: Mr. Plunkett (Science)
-OFFENSE: Claimed his cold was "a science experiment in airborne particle
-          distribution." Distributed particles over three rows of students.
-PUNISHMENT: 45 min + must bring tissues tomorrow. Brought 47 boxes.
-             We're covered for winter.
+DATE:       Wed, Sep 18, 2024 — 3:15 PM
+STUDENT:    Cody McSneeze, Grade 6
+TEACHER:    Mr. Plunkett (Science)
+OFFENSE:    Claimed his cold was "a science experiment in airborne particle distribution." Distributed particles over three rows of students.
+PUNISHMENT: 45 min + must bring tissues tomorrow. Brought 47 boxes. We're covered for winter.
 ------------------------------------------------------------
 
-DATE:    Fri, Oct 04, 2024 — 3:15 PM
-STUDENT: Emma Giggleston, Grade 8
-TEACHER: Ms. Pringle (English)
-OFFENSE: Rewrote the weekly vocabulary quiz as a rap song and performed
-          it. Got every answer correct. Still in detention.
-          (Ms. Pringle is still humming it. Do not tell Emma.)
-PUNISHMENT: 1 hour. Used the time to write a second rap. Principal rated
-             it 8/10. This stays off the record. Except it is on the record.
+DATE:       Fri, Oct 04, 2024 — 3:15 PM
+STUDENT:    Emma Giggleston, Grade 8
+TEACHER:    Ms. Pringle (English)
+OFFENSE:    Rewrote the weekly vocabulary quiz as a rap song and performed it. Got every answer correct. Still in detention. (Ms. Pringle is still humming it. Do not tell Emma.)
+PUNISHMENT: 1 hour. Used the time to write a second rap. Principal rated it 8/10. This stays off the record. Except it is on the record.
 ------------------------------------------------------------
 
-DATE:    Tue, Oct 22, 2024 — 3:15 PM
-STUDENT: Jake Kim, Grade 7
-TEACHER: Coach Bellamy (P.E.)
-OFFENSE: Convinced the class that "competitive sitting" was an Olympic
-          sport and held trials. 28 students participated. 2 fell asleep.
-          Coach Bellamy nearly joined them.
+DATE:       Tue, Oct 22, 2024 — 3:15 PM
+STUDENT:    Jake Kim, Grade 7
+TEACHER:    Coach Bellamy (P.E.)
+OFFENSE:    Convinced the class that "competitive sitting" was an Olympic sport and held trials. 28 students participated. 2 fell asleep. Coach Bellamy nearly joined them.
 PUNISHMENT: 1 hour. Sat very still. Irony noted by all.
 ------------------------------------------------------------
 
-DATE:    Thu, Nov 07, 2024 — 3:15 PM
-STUDENT: Sophie Bananapeels, Grade 6
-TEACHER: Mr. Fitch (Math)
-OFFENSE: Replaced all the 7s on the classroom number line with drawings
-          of a chicken. 7 is now a chicken. Students cannot unlearn this.
-          Three kids now say "chicken" instead of 7 on tests.
-PUNISHMENT: 1 hour. Must make new number line. Made one with better
-             chickens. It was confiscated. Then laminated. It's in the
-             teacher's lounge now.
+DATE:       Thu, Nov 07, 2024 — 3:15 PM
+STUDENT:    Sophie Bananapeels, Grade 6
+TEACHER:    Mr. Fitch (Math)
+OFFENSE:    Replaced all the 7s on the classroom number line with drawings of a chicken. 7 is now a chicken. Students cannot unlearn this. Three kids now say "chicken" instead of 7 on tests.
+PUNISHMENT: 1 hour. Must make new number line. Made one with better chickens. It was confiscated. Then laminated. It's in the teacher's lounge now.
 ------------------------------------------------------------
 
-DATE:    Mon, Dec 02, 2024 — 3:15 PM
-STUDENT: Benny Noodlestir, Grade 7
-TEACHER: Mrs. Flannery (History)
-OFFENSE: During silent reading, communicated entirely using hand puppets
-          made from his socks. Conducted a full interview with 'Señor Left
-          Sock' regarding the fall of the Roman Empire. Actually pretty
-          historically accurate.
+DATE:       Mon, Dec 02, 2024 — 3:15 PM
+STUDENT:    Benny Noodlestir, Grade 7
+TEACHER:    Mrs. Flannery (History)
+OFFENSE:    During silent reading, communicated entirely using hand puppets made from his socks. Conducted a full interview with 'Señor Left Sock' regarding the fall of the Roman Empire. Actually pretty historically accurate.
 PUNISHMENT: 1 hour. Señor Left Sock was confiscated pending review.
 ------------------------------------------------------------
 
-DATE:    Wed, Jan 15, 2025 — 3:15 PM
-STUDENT: Tyler Pranksworth, Grade 7
-TEACHER: Multiple (class-wide incident)
-OFFENSE: Organised what he called a "Flash Freeze" — at exactly 10:00 AM
-          every student stopped moving simultaneously for 60 seconds.
-          Four teachers checked for a gas leak. Fire dept was not called.
-          (It was a close call.)
-PUNISHMENT: 2 hours. Tyler sat completely still in detention as a
-             "personal record attempt." Made it 3 minutes. New record.
+DATE:       Wed, Jan 15, 2025 — 3:15 PM
+STUDENT:    Tyler Pranksworth, Grade 7
+TEACHER:    Multiple (class-wide incident)
+OFFENSE:    Organised what he called a "Flash Freeze" — at exactly 10:00 AM every student stopped moving simultaneously for 60 seconds. Four teachers checked for a gas leak. Fire dept was not called. (It was a close call.)
+PUNISHMENT: 2 hours. Tyler sat completely still in detention as a "personal record attempt." Made it 3 minutes. New record.
 ------------------------------------------------------------
 
-DATE:    Fri, Feb 14, 2025 — 3:15 PM
-STUDENT: Lily Butterfingers, Grade 6
-TEACHER: Ms. Pringle (English)
-OFFENSE: Valentine's Day. Lily made 32 valentines. Each one individually
-          glittered. The glitter is still in the HVAC system.
-          Maintenance says it will shimmer until roughly 2031.
-PUNISHMENT: 1 hour. Spent 58 minutes apologising. 2 minutes crying.
-             Glitter everywhere regardless.
+DATE:       Fri, Feb 14, 2025 — 3:15 PM
+STUDENT:    Lily Butterfingers, Grade 6
+TEACHER:    Ms. Pringle (English)
+OFFENSE:    Valentine's Day. Lily made 32 valentines. Each one individually glittered. The glitter is still in the HVAC system. Maintenance says it will shimmer until roughly 2031.
+PUNISHMENT: 1 hour. Spent 58 minutes apologising. 2 minutes crying. Glitter everywhere regardless.
 ------------------------------------------------------------
 
-DATE:    Tue, Mar 11, 2025 — 3:15 PM
-STUDENT: Marcus Loudmouth, Grade 8
-TEACHER: Mr. Plunkett (Science)
-OFFENSE: Tested acoustic properties of cafeteria by yelling "ECHO!"
-          repeatedly until the jello on 14 trays achieved visible
-          resonance. Considered noteworthy by Physics dept. Still detention.
+DATE:       Tue, Mar 11, 2025 — 3:15 PM
+STUDENT:    Marcus Loudmouth, Grade 8
+TEACHER:    Mr. Plunkett (Science)
+OFFENSE:    Tested acoustic properties of cafeteria by yelling "ECHO!" repeatedly until the jello on 14 trays achieved visible resonance. Considered noteworthy by Physics dept. Still detention.
 PUNISHMENT: 1 hour. Was very quiet. Suspiciously quiet.
 ------------------------------------------------------------
 
 NOTE FROM V.P. HENDERSON:
-  If Tyler Pranksworth appears in this log one more time, we are giving
-  him his own column. Possibly his own ZIP code.
+If Tyler Pranksworth appears in this log one more time, we are giving him his own column. Possibly his own ZIP code.
 
-  Also: whoever replaced the staff room sugar with salt AGAIN, we know
-  it was not Tyler this time. The forensic evidence points to 6th grade.
-  You know who you are. The coffee knows who you are.
+Also: whoever replaced the staff room sugar with salt AGAIN, we know it was not Tyler this time. The forensic evidence points to 6th grade. You know who you are. The coffee knows who you are.
 
 ============================================================
 END OF LOG — Page 1 of 1
