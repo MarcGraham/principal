@@ -387,11 +387,11 @@ def open_suspension_list():
                  wraplength=REASON_WRAP
                  ).pack(side=tk.LEFT, fill=tk.X, expand=True, pady=2)
 
-    tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(3, 1))
+    tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(6, 2))
     tk.Label(page, text="* Case still pending. Lily's lawyer is a 6th grader.",
              font=('Courier New', 13, 'italic'), fg='#888888', bg='white').pack()
     tk.Label(page, text="CONFIDENTIAL — Disciplinary Records — Not for Distribution",
-             font=('Tahoma', 13, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 4))
+             font=('Tahoma', 13, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
 
 
 # ─── Detention Log Viewer ─────────────────────────────────────────────────────
