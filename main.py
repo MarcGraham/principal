@@ -519,11 +519,13 @@ def open_grade_portal():
     entry = tk.Entry(win.content, font=('Tahoma', 12), show="●",
                      justify="center", relief=tk.FLAT, bd=0,
                      bg='white', fg='#000000', width=22,
+                     insertbackground='#1c5aaa',
+                     insertontime=600, insertofftime=300,
                      highlightthickness=2,
                      highlightbackground='#4a88d8',
                      highlightcolor='#6ab0ff')
     entry.pack(pady=12)
-    entry.focus_set()
+    win.after(50, entry.focus_set)
 
     def verify():
         if entry.get().strip().lower() == PORTAL_PASSWORD:
@@ -922,13 +924,14 @@ comp_pass_entry = tk.Entry(bg, font=('Tahoma', 13), show="●",
                            justify="center", relief=tk.FLAT, bd=0,
                            bg='#d0e4f8', fg='#000000',
                            insertbackground='#1c5aaa',
+                           insertontime=600, insertofftime=300,
                            width=18,
                            highlightthickness=2,
                            highlightbackground='#3a78c0',
                            highlightcolor='#58aaff')
 bg.create_window(SW//2, py+170, window=comp_pass_entry,
                  width=222, height=30)
-comp_pass_entry.focus_set()
+root.after(100, comp_pass_entry.focus_set)
 
 # ── Gradient arrow login button ───────────────────────────────────────────────
 BW, BH = 54, 30
