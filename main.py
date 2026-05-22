@@ -510,7 +510,7 @@ Printed: 2025-05-22   [CONFIDENTIAL — Staff Use Only]
 # ─── Grade Portal ─────────────────────────────────────────────────────────────
 def open_grade_portal():
     """Creates the secure login gate for the grade portal."""
-    win = StyledWindow(root, "Secure Database Gateway", 430, 270)
+    win = StyledWindow(root, "Secure Database Gateway", 430, 290)
     tk.Label(win.content, text="🔒  ENCRYPTED PORTAL",
              font=('Tahoma', 14, 'bold'), fg='#a01818',
              bg=win.WIN_BG).pack(pady=(18, 4))
@@ -527,18 +527,20 @@ def open_grade_portal():
     entry.pack(pady=12)
     win.after(50, entry.focus_set)
 
+    # Inline error — avoids native messagebox grab/focus conflict on macOS
+    err_lbl = tk.Label(win.content, text="", font=('Tahoma', 10, 'bold'),
+                       fg='#cc0000', bg=win.WIN_BG)
+    err_lbl.pack(pady=(0, 4))
+
     def verify():
         if entry.get().strip().lower() == PORTAL_PASSWORD:
             win.destroy()
             show_grade_modifier_interface()
         else:
-            messagebox.showerror("Security Alert",
-                                 "Invalid Encryption Key. Access Denied.")
             entry.delete(0, tk.END)
-            # Re-establish focus chain after native messagebox releases the grab
-            win.lift()
-            win.grab_set()
+            err_lbl.config(text="⚠  Invalid Encryption Key. Access Denied.")
             win.after(50, entry.focus_set)
+            win.after(3000, lambda: err_lbl.config(text=""))
 
     win.bind('<Return>', lambda e: verify())
     btn = os_button(win.content, "  Authenticate  ", verify,
