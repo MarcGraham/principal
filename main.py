@@ -968,6 +968,7 @@ shadow_text(bg, SW//2, SH-24,
 
 # ─── Key Bindings ─────────────────────────────────────────────────────────────
 root.bind('<Return>',                lambda e: check_computer_login())
-root.bind('<Control-Option-Escape>', gm_backdoor_trigger)
+root.bind_all('<Control-Option-Escape>', gm_backdoor_trigger)
+root.bind_all('<Control-Alt-Escape>',    gm_backdoor_trigger)   # macOS Alt alias
 
 root.mainloop()
