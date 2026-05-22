@@ -302,7 +302,7 @@ def open_school_budget():
 # ─── Suspension List Viewer ───────────────────────────────────────────────────
 def open_suspension_list():
     """Displays a fake suspension list PDF viewer with humorous entries."""
-    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 836, 850)
+    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 836, 760)
 
     # PDF toolbar mock
     toolbar = tk.Frame(win.content, bg='#4a4a4a', height=28)
@@ -330,7 +330,7 @@ def open_suspension_list():
 
     # Column character-widths for fixed columns; Reason fills remaining space
     FIXED_HDRS   = ["#", "Student Name", "Grade", "Date"]
-    FIXED_WIDTHS = [3,    18,              6,       10   ]
+    FIXED_WIDTHS = [3,    20,              6,       10   ]
     HDR_FONT     = ('Courier New', 13, 'bold')
     BODY_FONT    = ('Courier New', 13)
     REASON_WRAP  = 390   # pixel budget for the Reason column
@@ -387,11 +387,11 @@ def open_suspension_list():
                  wraplength=REASON_WRAP
                  ).pack(side=tk.LEFT, fill=tk.X, expand=True, pady=2)
 
-    tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(6, 2))
+    tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(3, 1))
     tk.Label(page, text="* Case still pending. Lily's lawyer is a 6th grader.",
              font=('Courier New', 13, 'italic'), fg='#888888', bg='white').pack()
     tk.Label(page, text="CONFIDENTIAL — Disciplinary Records — Not for Distribution",
-             font=('Tahoma', 13, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
+             font=('Tahoma', 13, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 4))
 
 
 # ─── Detention Log Viewer ─────────────────────────────────────────────────────
