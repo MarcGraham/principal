@@ -535,6 +535,10 @@ def open_grade_portal():
             messagebox.showerror("Security Alert",
                                  "Invalid Encryption Key. Access Denied.")
             entry.delete(0, tk.END)
+            # Re-establish focus chain after native messagebox releases the grab
+            win.lift()
+            win.grab_set()
+            win.after(50, entry.focus_set)
 
     win.bind('<Return>', lambda e: verify())
     btn = os_button(win.content, "  Authenticate  ", verify,
