@@ -2,18 +2,37 @@ import tkinter as tk
 from tkinter import messagebox
 import time, random
 from datetime import datetime
+import os as _os
+try:
+    from PIL import Image as _PILImage, ImageTk as _PILImageTk
+    _PIL_OK = True
+except ImportError:
+    _PIL_OK = False
 
-# ─── macOS Hardware Simulation ────────────────────────────────────────────────
+# ─── GPIO — real on Raspberry Pi, simulated everywhere else ──────────────────
+RELAY_PIN = 18          # BCM pin number wired to the maglock relay
+
 class MockGPIO:
+    """Fallback used on non-Pi platforms (macOS, Windows, etc.)."""
     def __init__(self, pin, active_high=False, initial_value=False):
         self.pin = pin
-        print(f"[MOCK] Simulated relay initialized on Pin {pin}")
+        print(f"[MOCK] Simulated relay initialised on BCM Pin {pin}")
     def on(self):
         print("\n" + "="*50)
         print("[HARDWARE] Maglock Released! Exit Door Unlocked.")
         print("="*50 + "\n")
+    def off(self):
+        print(f"[MOCK] Pin {self.pin} → OFF")
+    def close(self):
+        pass
 
-door_lock = MockGPIO(18)
+try:
+    from gpiozero import OutputDevice
+    door_lock = OutputDevice(RELAY_PIN, active_high=True, initial_value=False)
+    print(f"[GPIO] Real relay on BCM pin {RELAY_PIN} — running on Raspberry Pi")
+except Exception as _gpio_err:
+    print(f"[GPIO] gpiozero not available ({_gpio_err}). Using mock.")
+    door_lock = MockGPIO(RELAY_PIN)
 
 # ─── Config ───────────────────────────────────────────────────────────────────
 COMP_PASSWORD    = "admin"
@@ -133,16 +152,60 @@ class StyledWindow(tk.Toplevel):
 
 
 def os_button(parent, text, command, **kw):
-    """Standard OS-style raised button."""
-    kw.setdefault('font',             ('Tahoma', 9))
-    kw.setdefault('bg',               '#d8d4c6')
-    kw.setdefault('fg',               '#000000')
-    kw.setdefault('relief',           tk.RAISED)
-    kw.setdefault('bd',               2)
-    kw.setdefault('activebackground', '#eae6d8')
-    kw.setdefault('cursor',           'hand2')
-    kw.setdefault('padx',             8)
-    return tk.Button(parent, text=text, command=command, **kw)
+    """XP-style gradient canvas button, styled like the Start button."""
+    font      = kw.pop('font',   ('Tahoma', 9, 'bold'))
+    fg        = kw.pop('fg',     'white')
+    base_c1   = kw.pop('bg',     '#1460c0')          # top colour
+    base_c2   = kw.pop('activebackground', '#3e96e0') # hover top colour
+    hi_border = kw.pop('highlightbackground', '#0e50c0')
+    # ignore any leftover tk.Button-only kwargs that don't apply to Canvas
+    for _drop in ('activeforeground', 'relief', 'bd', 'padx', 'pady'):
+        kw.pop(_drop, None)
+
+    # Measure text to size the canvas
+    tmp = tk.Label(parent, text=text, font=font)
+    tmp.update_idletasks()
+    tw = tmp.winfo_reqwidth() + 20
+    th = tmp.winfo_reqheight() + 8
+    tmp.destroy()
+    BW, BH = max(tw, 80), max(th, 26)
+
+    # Derive hover colours by lightening base a little
+    def _lighten(hex_c, amt=0.25):
+        r, g, b = hex_rgb(hex_c)
+        return '#{:02x}{:02x}{:02x}'.format(
+            min(255, int(r + (255-r)*amt)),
+            min(255, int(g + (255-g)*amt)),
+            min(255, int(b + (255-b)*amt)))
+
+    hover_c1 = _lighten(base_c1, 0.25)
+    hover_c2 = _lighten(base_c2, 0.25)
+
+    btn = tk.Canvas(parent, width=BW, height=BH,
+                    highlightthickness=1,
+                    highlightbackground=hi_border,
+                    cursor='hand2', **kw)
+
+    def _draw(hover=False):
+        btn.delete('all')
+        c1 = hover_c1 if hover else base_c1
+        c2 = hover_c2 if hover else base_c2
+        mid = BH * 55 // 100
+        fill_gradient(btn, 0, 0,   BW, mid, c1, c2, steps=mid)
+        fill_gradient(btn, 0, mid, BW, BH,  c2,
+                      lerp_color(c1, _lighten(c1, -0.15), 0.45),
+                      steps=BH - mid)
+        # Top chrome shine
+        btn.create_line(1, 1, BW-1, 1,
+                        fill=_lighten(c2, 0.35), width=1)
+        btn.create_text(BW//2, BH//2, text=text,
+                        fill=fg, font=font)
+
+    _draw()
+    btn.bind('<Enter>',    lambda e: _draw(True))
+    btn.bind('<Leave>',    lambda e: _draw(False))
+    btn.bind('<Button-1>', lambda e: command())
+    return btn
 
 # ─── Login Logic ──────────────────────────────────────────────────────────────
 def check_computer_login():
@@ -166,10 +229,10 @@ def open_grade_portal():
              font=('Tahoma', 14, 'bold'), fg='#a01818',
              bg=win.WIN_BG).pack(pady=(18, 4))
     tk.Label(win.content, text="Enter Database Encryption Key:",
-             font=('Tahoma', 10), bg=win.WIN_BG).pack()
+             font=('Tahoma', 10), bg=win.WIN_BG, fg='#111111').pack()
     entry = tk.Entry(win.content, font=('Tahoma', 12), show="●",
                      justify="center", relief=tk.FLAT, bd=0,
-                     bg='white', width=22,
+                     bg='white', fg='#000000', width=22,
                      highlightthickness=2,
                      highlightbackground='#4a88d8',
                      highlightcolor='#6ab0ff')
@@ -186,8 +249,9 @@ def open_grade_portal():
             entry.delete(0, tk.END)
 
     win.bind('<Return>', lambda e: verify())
-    os_button(win.content, "  Authenticate  ", verify,
-              font=('Tahoma', 10, 'bold')).pack(pady=6)
+    btn = os_button(win.content, "  Authenticate  ", verify,
+                    font=('Tahoma', 10, 'bold'))
+    btn.pack(pady=6)
 
 
 def show_grade_modifier_interface():
@@ -202,12 +266,13 @@ def show_grade_modifier_interface():
     for subject in student_grades:
         row = tk.Frame(win.content, bg=win.WIN_BG)
         row.pack(pady=9)
-        tk.Label(row, text=f"{subject}:", font=('Tahoma', 12),
-                 bg=win.WIN_BG, width=12, anchor='e').pack(side=tk.LEFT, padx=6)
+        tk.Label(row, text=f"{subject}:", font=('Tahoma', 12, 'bold'),
+                 fg='#1a1a1a', bg=win.WIN_BG, width=12, anchor='e').pack(side=tk.LEFT, padx=6)
         var = tk.StringVar(value="F")
         opt = tk.OptionMenu(row, var, "A", "B", "C", "D", "F")
         opt.config(font=('Tahoma', 11), width=4,
-                   bg='#d8d4c6', fg='#000000', relief=tk.RAISED, bd=2)
+                   bg='#d8d4c6', fg='#111111', activeforeground='#000000',
+                   relief=tk.RAISED, bd=2)
         opt.pack(side=tk.LEFT)
         dropdowns[subject] = var
 
@@ -223,11 +288,12 @@ def show_grade_modifier_interface():
             messagebox.showerror("Sync Failed",
                 "Error: Student GPA remains below passing threshold.")
 
-    os_button(win.content, "  Commit Changes to Server  ", submit_grades,
-              font=('Tahoma', 11, 'bold'),
-              bg='#246e28', fg='white',
-              activebackground='#2e8832',
-              activeforeground='white').pack(pady=4)
+    btn = os_button(win.content, "  Commit Changes to Server  ", submit_grades,
+                    font=('Tahoma', 11, 'bold'),
+                    bg='#246e28',
+                    activebackground='#2e8832',
+                    highlightbackground='#185020')
+    btn.pack(pady=4)
 
 # ─── Win Condition ────────────────────────────────────────────────────────────
 def trigger_win_condition():
@@ -253,20 +319,58 @@ def trigger_win_condition():
     door_lock.on()
 
 # ─── Desktop Cloud Helper ─────────────────────────────────────────────────────
+import math as _math
+
+def _catmull_points(pts, steps=12):
+    """Expand a list of (x,y) control points into a smooth Catmull-Rom curve."""
+    out = []
+    n = len(pts)
+    for i in range(n - 1):
+        p0 = pts[max(i-1, 0)]
+        p1 = pts[i]
+        p2 = pts[i+1]
+        p3 = pts[min(i+2, n-1)]
+        for t in range(steps):
+            tt = t / steps
+            tt2 = tt*tt; tt3 = tt2*tt
+            x = 0.5*((2*p1[0])
+                     + (-p0[0]+p2[0])*tt
+                     + (2*p0[0]-5*p1[0]+4*p2[0]-p3[0])*tt2
+                     + (-p0[0]+3*p1[0]-3*p2[0]+p3[0])*tt3)
+            y = 0.5*((2*p1[1])
+                     + (-p0[1]+p2[1])*tt
+                     + (2*p0[1]-5*p1[1]+4*p2[1]-p3[1])*tt2
+                     + (-p0[1]+3*p1[1]-3*p2[1]+p3[1])*tt3)
+            out.extend([x, y])
+    out.extend(pts[-1])
+    return out
+
 def draw_cloud(c, cx, cy, sz):
-    """Draw a fluffy cloud from overlapping white ovals."""
+    """Volumetric XP-style cumulus cloud: shadow base → grey mid → white tops."""
+    # Shadow ellipse on sky
+    c.create_oval(cx - sz, cy + sz//3,
+                  cx + sz, cy + sz//3 + sz//3,
+                  fill='#b8d8ec', outline='')
+    # Puff definitions: (dx, dy, rx, ry, colour)
     puffs = [
-        ( 0,     0,     sz,     sz//2),
-        (-sz//2, sz//5, sz*2//3, sz*2//5),
-        ( sz//2, sz//5, sz*2//3, sz*2//5),
-        ( 0,    -sz//3, sz//2,   sz//3),
+        # grey underlayer
+        ( 0,      sz//5,   sz,      sz*2//5, '#d8e8f4'),
+        (-sz//2,  sz//4,   sz*3//5, sz*3//8, '#ddeaf6'),
+        ( sz//2,  sz//4,   sz*3//5, sz*3//8, '#ddeaf6'),
+        # bright mid
+        (-sz//3,  0,       sz*3//5, sz//2,   '#eef4fb'),
+        ( sz//3,  0,       sz*3//5, sz//2,   '#eef4fb'),
+        ( 0,     -sz//6,   sz*2//3, sz//2,   '#f4f8fd'),
+        # bright tops
+        (-sz//4, -sz//3,   sz//2,   sz//3,   '#ffffff'),
+        ( sz//4, -sz//3,   sz//2,   sz//3,   '#ffffff'),
+        ( 0,     -sz//2,   sz*2//5, sz//3,   '#ffffff'),
+        # highlight peak
+        ( 0,     -sz*2//3, sz//4,   sz//5,   '#ffffff'),
     ]
-    # Shadow
-    c.create_oval(cx-sz, cy+sz//4, cx+sz, cy+sz//2+6,
-                  fill='#c0dcee', outline='')
-    for dx, dy, rx, ry in puffs:
+    for dx, dy, rx, ry, col in puffs:
         c.create_oval(cx+dx-rx, cy+dy-ry, cx+dx+rx, cy+dy+ry,
-                      fill='white', outline='')
+                      fill=col, outline='')
 
 # ─── Clock ────────────────────────────────────────────────────────────────────
 def update_clock(label):
@@ -325,64 +429,70 @@ def show_desktop():
     update_clock(clk)
 
     # ── Wallpaper Canvas ───────────────────────────────────────────────────────
-    wc = tk.Canvas(root, highlightthickness=0)
+    wc = tk.Canvas(root, highlightthickness=0, bg='#1a1a1a')
     wc.pack(fill=tk.BOTH, expand=True)
 
-    sky_h    = int(DH * 0.56)
-    haze_h   = int(DH * 0.10)
-    hill_y   = sky_h + haze_h
-    hill2_y  = int(DH * 0.74)
-    cloud_y  = int(sky_h * 0.62)
+    # ── LEGS Academy photo as full desktop wallpaper ───────────────────────────
+    _script_dir = _os.path.dirname(_os.path.abspath(__file__))
+    _img_path   = _os.path.join(_script_dir, 'legs_academy.png')
+    _wp_photo   = None
+    if _PIL_OK and _os.path.exists(_img_path):
+        from PIL import ImageEnhance as _IE, ImageDraw as _ID
+        _pil = _PILImage.open(_img_path).convert('RGB')
+        # Scale to cover the full desktop area
+        src_w, src_h = _pil.size
+        scale = max(SW / src_w, DH / src_h)
+        new_w = int(src_w * scale)
+        new_h = int(src_h * scale)
+        _pil  = _pil.resize((new_w, new_h), _PILImage.LANCZOS)
+        # Centre-crop to exact desktop size
+        left = (new_w - SW) // 2
+        top  = (new_h - DH) // 2
+        _pil = _pil.crop((left, top, left + SW, top + DH))
 
-    # Sky: deep azure → pale ice blue
-    fill_gradient(wc, 0, 0,       SW, sky_h,  '#1872cc', '#9ad4f0', steps=140)
-    # Haze / horizon band
-    fill_gradient(wc, 0, sky_h,   SW, hill_y, '#9ad4f0', '#c4eec4', steps=40)
-    # Back hills (softer, distant green)
-    fill_gradient(wc, 0, hill_y,  SW, hill2_y,'#78cc78', '#48aa48', steps=50)
-    # Front hills (vivid emerald)
-    fill_gradient(wc, 0, hill2_y, SW, DH,     '#38b038', '#18601a', steps=140)
+        # ── Bake vignette/contrast into PIL (tkinter stipple ≠ alpha blend) ──
+        # Slight overall darkening so desktop feels like a proper OS wallpaper
+        _pil = _IE.Brightness(_pil).enhance(0.78)
 
-    # Organic hill humps along the back-hill transition
-    rng = random.Random(42)
-    for i in range(10):
-        hx = int(SW * (i + 0.5) / 10)
-        hr = rng.randint(55, 115)
-        hy = hill_y + rng.randint(-18, 12)
-        wc.create_oval(hx-hr, hy-22, hx+hr, hy+45,
-                       fill='#78cc78', outline='')
+        # Dark left strip so icons always have contrast
+        _overlay = _PILImage.new('RGB', (SW, DH), (0, 0, 0))
+        _mask    = _PILImage.new('L',   (SW, DH), 0)
+        _draw    = _ID.Draw(_mask)
+        # Left gradient strip (icon column)
+        for _x in range(140):
+            _alpha = int(160 * (1 - _x / 140))
+            _draw.line([(_x, 0), (_x, DH)], fill=_alpha)
+        # Bottom strip
+        for _y in range(int(DH * 0.82), DH):
+            _t     = (_y - int(DH * 0.82)) / max(DH - int(DH * 0.82), 1)
+            _alpha = int(120 * _t)
+            _draw.line([(0, _y), (SW, _y)], fill=_alpha)
+        _pil = _PILImage.composite(_overlay, _pil, _mask)
 
-    # Sun (upper right of sky)
-    sx, sy = int(SW * 0.80), int(sky_h * 0.21)
-    # Outer glow layers (stippled)
-    wc.create_oval(sx-95, sy-95, sx+95, sy+95,
-                   fill='#fff6a0', outline='', stipple='gray12')
-    wc.create_oval(sx-70, sy-70, sx+70, sy+70,
-                   fill='#ffee66', outline='', stipple='gray25')
-    wc.create_oval(sx-52, sy-52, sx+52, sy+52,
-                   fill='#ffee44', outline='', stipple='gray50')
-    # Sun disc
-    wc.create_oval(sx-36, sy-36, sx+36, sy+36,
-                   fill='#ffffcc', outline='#ffe566', width=2)
-    wc.create_oval(sx-32, sy-32, sx+32, sy+32, fill='#fffff0', outline='')
-    wc.create_oval(sx-16, sy-16, sx+16, sy+16, fill='#ffffff', outline='')
+        _wp_photo    = _PILImageTk.PhotoImage(_pil)
+        wc._wp_photo = _wp_photo        # keep reference — prevents GC
+        wc.create_image(0, 0, image=_wp_photo, anchor='nw')
+    else:
+        # Fallback gradient if image missing
+        fill_gradient(wc, 0, 0, SW, DH, '#1a3060', '#0a1828', steps=120)
 
-    # Cloud layer
-    cloud_positions = [
-        (int(SW*0.12), cloud_y - 25, 52),
-        (int(SW*0.30), cloud_y + 10, 38),
-        (int(SW*0.46), cloud_y - 8,  62),
-        (int(SW*0.60), cloud_y + 18, 42),
-        (int(SW*0.40), cloud_y - 30, 30),
-    ]
-    for cx, cy, sz in cloud_positions:
-        draw_cloud(wc, cx, cy, sz)
-
-    # OS watermark
+    # ── OS watermark ──────────────────────────────────────────────────────────
     shadow_text(wc, SW-18, 15, text="EduOS Professional",
                 font=('Tahoma', 13, 'italic'), fill='white', anchor='ne')
 
-    # ── Desktop Icons ──────────────────────────────────────────────────────────
+    # ── Desktop Icons — dark backdrop pill for guaranteed contrast ─────────────
+    # horizon_y / haze_y are not defined in photo mode; set dummies so
+    # the icon loop below still works without them.
+    horizon_y = int(DH * 0.60)
+    haze_y    = int(DH * 0.65)
+
+    # ── Desktop Icons — dark pill backdrop guarantees contrast ────────────────
+    ICON_X      = 52          # horizontal centre of icon column
+    ICON_BTN_W  = 70
+    ICON_BTN_H  = 52
+    ICON_LBL_W  = 86
+    ICON_SPACING= 102
+
     icon_defs = [
         ("📁", "School\nBudget.xlsx",  lambda: open_dummy_file("School_Budget.xlsx")),
         ("📄", "Suspension\nList.pdf", lambda: open_dummy_file("Suspension_List.pdf")),
@@ -390,38 +500,53 @@ def show_desktop():
         ("🌐", "Grade\nPortal",        open_grade_portal),
     ]
 
+    PILL_BG   = '#181818'   # near-black icon button bg
+    PILL_HOV  = '#2a3a6a'   # hover: dark navy blue
+    PILL_FG   = '#ffffff'   # white label text
+
     for i, (ico, name, cmd) in enumerate(icon_defs):
-        iy = 20 + i * 102
-        # Compute approximate wallpaper color at this y for blending
-        if iy < sky_h:
-            bg_c = lerp_color('#1872cc', '#9ad4f0', iy / sky_h)
-        elif iy < hill_y:
-            bg_c = lerp_color('#9ad4f0', '#c4eec4', (iy-sky_h) / max(hill_y-sky_h, 1))
-        elif iy < hill2_y:
-            bg_c = lerp_color('#78cc78', '#48aa48', (iy-hill_y) / max(hill2_y-hill_y, 1))
-        else:
-            bg_c = lerp_color('#38b038', '#18601a', (iy-hill2_y) / max(DH-hill2_y, 1))
+        iy = 18 + i * ICON_SPACING
 
-        hover_bg = lerp_color(bg_c, '#2244bb', 0.55)
+        # Dark pill shadow behind the whole icon cell (icon + label)
+        cell_top    = iy - 6
+        cell_bottom = iy + ICON_BTN_H + 28
+        cell_left   = ICON_X - ICON_LBL_W // 2 - 4
+        cell_right  = ICON_X + ICON_LBL_W // 2 + 4
+        # Outer dark shadow
+        wc.create_rectangle(cell_left + 3, cell_top + 3,
+                             cell_right + 3, cell_bottom + 3,
+                             fill='#000000', outline='', stipple='gray50')
+        # Pill body — solid dark panel
+        wc.create_rectangle(cell_left, cell_top,
+                             cell_right, cell_bottom,
+                             fill=PILL_BG, outline='#404040', width=1)
+        # Subtle top-shine line
+        wc.create_line(cell_left+2, cell_top+1,
+                       cell_right-2, cell_top+1,
+                       fill='#555555', width=1)
 
+        # Icon button (transparent-looking against dark pill)
         ib = tk.Button(wc, text=ico, font=('Helvetica', 26),
-                       bg=bg_c, fg='#111111', relief=tk.FLAT, bd=0,
-                       activebackground=hover_bg,
+                       bg=PILL_BG, fg=PILL_FG,
+                       relief=tk.FLAT, bd=0,
+                       activebackground=PILL_HOV,
+                       activeforeground=PILL_FG,
                        cursor='hand2', command=cmd)
-        wc.create_window(52, iy+28, window=ib, width=70, height=56)
-        ib.bind('<Enter>', lambda e, b=ib, h=hover_bg:
-                b.config(bg=h, relief=tk.GROOVE, bd=1))
-        ib.bind('<Leave>', lambda e, b=ib, g=bg_c:
-                b.config(bg=g, relief=tk.FLAT, bd=0))
+        wc.create_window(ICON_X, iy + ICON_BTN_H // 2,
+                         window=ib, width=ICON_BTN_W, height=ICON_BTN_H)
+        ib.bind('<Enter>', lambda e, b=ib: b.config(bg=PILL_HOV))
+        ib.bind('<Leave>', lambda e, b=ib: b.config(bg=PILL_BG))
 
-        # White pill background behind label so black text is legible
-        # over any wallpaper color
+        # Label — white text on transparent (pill bg shows through)
         nl = tk.Label(wc, text=name, font=('Tahoma', 8),
-                      bg='#ffffff', fg='#111111', justify=tk.CENTER,
-                      relief=tk.FLAT, bd=0, padx=2)
-        wc.create_window(52, iy+76, window=nl, width=86)
+                      bg=PILL_BG, fg=PILL_FG,
+                      justify=tk.CENTER, relief=tk.FLAT, bd=0)
+        wc.create_window(ICON_X, iy + ICON_BTN_H + 14,
+                         window=nl, width=ICON_LBL_W)
         nl.bind('<Button-1>',        lambda e, c=cmd: c())
         nl.bind('<Double-Button-1>', lambda e, c=cmd: c())
+
+
 
 
 # ─── Main Window + Lock Screen ────────────────────────────────────────────────
@@ -509,7 +634,8 @@ bg.create_line(px+50, py+142, px+pw-50, py+142, fill='#1e4880', width=1)
 # ── Password entry ────────────────────────────────────────────────────────────
 comp_pass_entry = tk.Entry(bg, font=('Tahoma', 13), show="●",
                            justify="center", relief=tk.FLAT, bd=0,
-                           bg='#d0e4f8', insertbackground='#1c5aaa',
+                           bg='#d0e4f8', fg='#000000',
+                           insertbackground='#1c5aaa',
                            width=18,
                            highlightthickness=2,
                            highlightbackground='#3a78c0',
