@@ -403,7 +403,7 @@ def open_detention_logs():
     menubar = tk.Frame(win.content, bg='#f0f0f0', relief=tk.FLAT)
     menubar.pack(fill=tk.X)
     for lbl in ["File", "Edit", "Format", "View", "Help"]:
-        tk.Label(menubar, text=lbl, font=('Tahoma', 9), fg='#000000',
+        tk.Label(menubar, text=lbl, font=('Tahoma', 15), fg='#000000',
                  bg='#f0f0f0', padx=6, pady=2).pack(side=tk.LEFT)
 
     tk.Frame(win.content, bg='#c0c0c0', height=1).pack(fill=tk.X)
@@ -412,7 +412,7 @@ def open_detention_logs():
     txt_frame = tk.Frame(win.content, bg='white')
     txt_frame.pack(fill=tk.BOTH, expand=True)
 
-    txt = tk.Text(txt_frame, font=('Courier New', 9), bg='white', fg='#000000',
+    txt = tk.Text(txt_frame, font=('Courier New', 15), bg='white', fg='#000000',
                   relief=tk.FLAT, bd=0, wrap=tk.WORD,
                   padx=8, pady=6, state=tk.NORMAL)
     vsb3 = tk.Scrollbar(txt_frame, orient='vertical', command=txt.yview)
@@ -532,7 +532,7 @@ Printed: 2025-05-22   [CONFIDENTIAL — Staff Use Only]
 
     status = tk.Label(win.content,
                       text="Ln 1, Col 1    UTF-8    Windows (CRLF)",
-                      font=('Tahoma', 8), bg='#f0f0f0', fg='#444444',
+                      font=('Tahoma', 14), bg='#f0f0f0', fg='#444444',
                       anchor='w', relief=tk.SUNKEN, bd=1)
     status.pack(fill=tk.X, side=tk.BOTTOM)
 
