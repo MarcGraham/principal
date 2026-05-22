@@ -302,16 +302,16 @@ def open_school_budget():
 # ─── Suspension List Viewer ───────────────────────────────────────────────────
 def open_suspension_list():
     """Displays a fake suspension list PDF viewer with humorous entries."""
-    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 580, 500)
+    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 696, 600)
 
     # PDF toolbar mock
     toolbar = tk.Frame(win.content, bg='#4a4a4a', height=28)
     toolbar.pack(fill=tk.X)
     toolbar.pack_propagate(False)
     for lbl in ["File", "Edit", "View", "Tools", "Help"]:
-        tk.Label(toolbar, text=lbl, font=('Tahoma', 8), fg='#dddddd',
+        tk.Label(toolbar, text=lbl, font=('Tahoma', 12), fg='#dddddd',
                  bg='#4a4a4a', padx=6).pack(side=tk.LEFT)
-    tk.Label(toolbar, text="Page: 1 / 1", font=('Tahoma', 8),
+    tk.Label(toolbar, text="Page: 1 / 1", font=('Tahoma', 12),
              fg='#dddddd', bg='#4a4a4a').pack(side=tk.RIGHT, padx=8)
 
     # PDF body
@@ -322,18 +322,18 @@ def open_suspension_list():
                     highlightthickness=1, highlightbackground='#555555')
     page.pack(padx=20, pady=8, fill=tk.BOTH, expand=True)
 
-    tk.Label(page, text="LEGS ACADEMY", font=('Georgia', 14, 'bold'),
+    tk.Label(page, text="LEGS ACADEMY", font=('Georgia', 18, 'bold'),
              fg='#1a1a6e', bg='white').pack(pady=(14, 0))
     tk.Label(page, text="OFFICIAL SUSPENSION REGISTER — 2024-25 School Year",
-             font=('Georgia', 9, 'bold'), fg='#1a1a6e', bg='white').pack()
+             font=('Georgia', 13, 'bold'), fg='#1a1a6e', bg='white').pack()
     tk.Frame(page, bg='#1a1a6e', height=2).pack(fill=tk.X, padx=20, pady=6)
 
     headers = ["#", "Student Name", "Grade", "Date", "Reason", "Days"]
-    widths  = [3,    18,              6,       10,     40,        5]
+    widths  = [3,    18,              6,       10,     36,        5]
     hrow = tk.Frame(page, bg='#1a1a6e')
     hrow.pack(fill=tk.X, padx=20)
     for h, w in zip(headers, widths):
-        tk.Label(hrow, text=h, font=('Courier New', 8, 'bold'),
+        tk.Label(hrow, text=h, font=('Courier New', 11, 'bold'),
                  fg='white', bg='#1a1a6e', width=w, anchor='w'
                  ).pack(side=tk.LEFT)
 
@@ -367,7 +367,7 @@ def open_suspension_list():
         rf = tk.Frame(inner2, bg=row_bg)
         rf.pack(fill=tk.X)
         for val, w in zip([num, name, grade, date, reason, days], widths):
-            tk.Label(rf, text=val, font=('Courier New', 7), fg='#111111',
+            tk.Label(rf, text=val, font=('Courier New', 11), fg='#111111',
                      bg=row_bg, width=w, anchor='w', relief=tk.FLAT, bd=0
                      ).pack(side=tk.LEFT, pady=1)
 
@@ -376,9 +376,9 @@ def open_suspension_list():
 
     tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(6, 2))
     tk.Label(page, text="* Case still pending. Lily's lawyer is a 6th grader.",
-             font=('Courier New', 7, 'italic'), fg='#888888', bg='white').pack()
+             font=('Courier New', 11, 'italic'), fg='#888888', bg='white').pack()
     tk.Label(page, text="CONFIDENTIAL — Disciplinary Records — Not for Distribution",
-             font=('Tahoma', 7, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
+             font=('Tahoma', 11, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
 
 
 # ─── Detention Log Viewer ─────────────────────────────────────────────────────
