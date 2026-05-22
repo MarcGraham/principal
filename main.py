@@ -216,10 +216,312 @@ def check_computer_login():
         messagebox.showerror("Access Denied", "Incorrect Password.")
         comp_pass_entry.delete(0, tk.END)
 
-def open_dummy_file(filename):
-    """Simulates opening generic files to distract players."""
-    messagebox.showinfo(filename,
-        f"Document Empty.\nNo student record modifications found in {filename}.")
+# ─── School Budget Viewer ────────────────────────────────────────────────────
+def open_school_budget():
+    """Displays a fake-but-funny school budget spreadsheet."""
+    win = StyledWindow(root, "School_Budget.xlsx — Microsoft Excel", 672, 760)
+
+    tk.Label(win.content,
+             text="LEGS Academy — Annual Operating Budget FY 2024-25",
+             font=('Tahoma', 15, 'bold'), fg='#1a1a6e', bg=win.WIN_BG
+             ).pack(pady=(10, 2))
+    tk.Label(win.content,
+             text="Prepared by: Mr. Wigglesworth, Finance & Cheese Committee",
+             font=('Tahoma', 12, 'italic'), fg='#555555', bg=win.WIN_BG
+             ).pack(pady=(0, 6))
+
+    # Column definitions: (header text, char-width, anchor)
+    COL_DEFS = [("Category", 22), ("Budgeted ($)", 11), ("Actual ($)", 11), ("Notes", 28)]
+    FONT_HDR  = ('Courier New', 12, 'bold')
+    FONT_ROW  = ('Courier New', 12)
+    FONT_TOT  = ('Courier New', 12, 'bold')
+
+    # Spreadsheet header row
+    hdr_frame = tk.Frame(win.content, bg='#1a3a8a')
+    hdr_frame.pack(fill=tk.X, padx=10)
+    for col, w in COL_DEFS:
+        tk.Label(hdr_frame, text=col, font=FONT_HDR,
+                 fg='white', bg='#1a3a8a', width=w, anchor='w',
+                 relief=tk.FLAT, bd=0).pack(side=tk.LEFT, padx=2, pady=3)
+
+    rows = [
+        ("Teacher Salaries",          "412,000", "412,001", "Overspent by $1. Sorry, Mrs. Plum."),
+        ("Chalk & Dry-Erase Markers", "  1,200", "  4,800", "Someone drew a T-Rex on EVERYTHING"),
+        ("Emergency Pizza Fund",       "  3,500", "  3,499", "One slice left. Principal ate it."),
+        ("Library Books",             "  8,000", "  7,998", "2 books missing. Still blaming Jake."),
+        ("Gym Equipment",             "  6,200", " 12,400", "Accidentally bought a trampoline"),
+        ("Science Supplies",          "  4,000", " 14,000", "Who approved the volcano THAT big?"),
+        ("Cafeteria: Mystery Meat",   " 22,000", " 22,000", "Still a mystery. Do not investigate."),
+        ("Cafeteria: Chocolate Milk", "  5,500", " 11,200", "Kids negotiated a SECOND milk break"),
+        ("School Nurse Supplies",     "  2,800", "  4,100", "Mostly bandaids. So many bandaids."),
+        ("IT & Computers",            " 15,000", " 15,043", "$43 on screensaver of a fish tank"),
+        ("Janitorial Services",       " 18,000", " 18,000", "Heroes. True unsung heroes."),
+        ("Art Dept: Glitter",         "    200", "  3,200", "It's EVERYWHERE. We cannot stop it."),
+        ("School Mascot Costume",     "    800", "  2,700", "3rd one this year. Bears bite."),
+        ("Fire Extinguishers",        "    400", "  1,600", "Chemistry class. 'Nuff said."),
+        ("Principal's Stress Balls",  "     50", "    420", "Ordering in bulk now."),
+        ("TOTAL",                     "499,650", "532,961", "↑ We are so grounded."),
+    ]
+
+    # Plain frame — fills dialog, no scroll bar needed at this size
+    table_frame = tk.Frame(win.content, bg=win.WIN_BG)
+    table_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=2)
+
+    # NOTES_WRAP_PX: pixel budget for the Notes column at Courier 12 on macOS.
+    # (dialog width 672 − 2×10 padding − approx widths of cat/bud/act columns)
+    NOTES_WRAP_PX = 220
+
+    for idx, (cat, bud, act, note) in enumerate(rows):
+        row_bg = '#e8eef8' if idx % 2 == 0 else '#f5f5f5'
+        is_total = cat == 'TOTAL'
+        if is_total:
+            row_bg = '#c8d8f8'
+        rf = tk.Frame(table_frame, bg=row_bg)
+        rf.pack(fill=tk.X)
+        font_style = FONT_TOT if is_total else FONT_ROW
+        fg_col = '#8b0000' if is_total else '#111111'
+
+        # Fixed-width columns: Category, Budgeted, Actual
+        for val, (_, w) in zip([cat, bud, act], COL_DEFS[:3]):
+            tk.Label(rf, text=val, font=font_style, fg=fg_col,
+                     bg=row_bg, width=w, anchor='w', relief=tk.FLAT, bd=0
+                     ).pack(side=tk.LEFT, padx=2, pady=2)
+
+        # Notes column: no fixed char-width, wraps at pixel boundary instead
+        tk.Label(rf, text=note, font=font_style, fg=fg_col,
+                 bg=row_bg, anchor='w', justify=tk.LEFT,
+                 wraplength=NOTES_WRAP_PX, relief=tk.FLAT, bd=0
+                 ).pack(side=tk.LEFT, padx=2, pady=2, fill=tk.X, expand=True)
+
+    footer = tk.Label(win.content,
+                      text="⚠  CONFIDENTIAL  •  Do not share with students or the cheese committee",
+                      font=('Tahoma', 11, 'italic'), fg='#888888', bg=win.WIN_BG)
+    footer.pack(pady=(4, 8))
+
+
+# ─── Suspension List Viewer ───────────────────────────────────────────────────
+def open_suspension_list():
+    """Displays a fake suspension list PDF viewer with humorous entries."""
+    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 580, 500)
+
+    # PDF toolbar mock
+    toolbar = tk.Frame(win.content, bg='#4a4a4a', height=28)
+    toolbar.pack(fill=tk.X)
+    toolbar.pack_propagate(False)
+    for lbl in ["File", "Edit", "View", "Tools", "Help"]:
+        tk.Label(toolbar, text=lbl, font=('Tahoma', 8), fg='#dddddd',
+                 bg='#4a4a4a', padx=6).pack(side=tk.LEFT)
+    tk.Label(toolbar, text="Page: 1 / 1", font=('Tahoma', 8),
+             fg='#dddddd', bg='#4a4a4a').pack(side=tk.RIGHT, padx=8)
+
+    # PDF body
+    pdf_frame = tk.Frame(win.content, bg='#888888', pady=10)
+    pdf_frame.pack(fill=tk.BOTH, expand=True)
+
+    page = tk.Frame(pdf_frame, bg='white',
+                    highlightthickness=1, highlightbackground='#555555')
+    page.pack(padx=20, pady=8, fill=tk.BOTH, expand=True)
+
+    tk.Label(page, text="LEGS ACADEMY", font=('Georgia', 14, 'bold'),
+             fg='#1a1a6e', bg='white').pack(pady=(14, 0))
+    tk.Label(page, text="OFFICIAL SUSPENSION REGISTER — 2024-25 School Year",
+             font=('Georgia', 9, 'bold'), fg='#1a1a6e', bg='white').pack()
+    tk.Frame(page, bg='#1a1a6e', height=2).pack(fill=tk.X, padx=20, pady=6)
+
+    headers = ["#", "Student Name", "Grade", "Date", "Reason", "Days"]
+    widths  = [3,    18,              6,       10,     40,        5]
+    hrow = tk.Frame(page, bg='#1a1a6e')
+    hrow.pack(fill=tk.X, padx=20)
+    for h, w in zip(headers, widths):
+        tk.Label(hrow, text=h, font=('Courier New', 8, 'bold'),
+                 fg='white', bg='#1a1a6e', width=w, anchor='w'
+                 ).pack(side=tk.LEFT)
+
+    entries = [
+        ("01", "Tyler Pranksworth",   "7th", "Sep 04", "Released 47 frogs into gym during assembly",          "3"),
+        ("02", "Cody McSneeze",       "6th", "Sep 12", "Sneezed on the science fair. On purpose.",             "1"),
+        ("03", "Emma Giggleston",     "8th", "Sep 19", "Convinced half the class that Thursday was cancelled", "2"),
+        ("04", "Jake 'The Vault' Kim","7th", "Oct 02", "Ate 11 lunches in one day (his own + others)",         "1"),
+        ("05", "Sophie Bananapeels",  "6th", "Oct 15", "Booby-trapped the principal's chair with a whoopee",  "2"),
+        ("06", "Marcus Loudmouth",    "8th", "Nov 01", "Held unofficial 'burp contest' during math quiz",      "1"),
+        ("07", "Tyler Pranksworth",   "7th", "Nov 08", "Glued ALL the chairs to the ceiling (don't ask)",     "5"),
+        ("08", "Zoe Klutzenburg",     "6th", "Nov 22", "Knocked over the entire school trophy cabinet. Twice.","1"),
+        ("09", "Benny Noodlestir",    "7th", "Dec 04", "Microwaved fish in the teacher's lounge at 7 AM",     "2"),
+        ("10", "Tyler Pranksworth",   "7th", "Jan 13", "See files #1 and #7. Tyler knows what he did.",        "5"),
+        ("11", "Lily Butterfingers",  "6th", "Feb 06", "Slipped on own banana peel. Blamed school. Sued.",    "0*"),
+        ("12", "Noah Loudsnore",      "8th", "Mar 01", "Fell asleep in gym, snored so loud class was dismissed","1"),
+    ]
+
+    scroll_f = tk.Frame(page, bg='white')
+    scroll_f.pack(fill=tk.BOTH, expand=True, padx=20, pady=4)
+    sc = tk.Canvas(scroll_f, bg='white', highlightthickness=0)
+    sb2 = tk.Scrollbar(scroll_f, orient='vertical', command=sc.yview)
+    sc.configure(yscrollcommand=sb2.set)
+    sb2.pack(side=tk.RIGHT, fill=tk.Y)
+    sc.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+    inner2 = tk.Frame(sc, bg='white')
+    sc.create_window((0, 0), window=inner2, anchor='nw')
+
+    for idx, (num, name, grade, date, reason, days) in enumerate(entries):
+        row_bg = '#f0f4ff' if idx % 2 == 0 else 'white'
+        rf = tk.Frame(inner2, bg=row_bg)
+        rf.pack(fill=tk.X)
+        for val, w in zip([num, name, grade, date, reason, days], widths):
+            tk.Label(rf, text=val, font=('Courier New', 7), fg='#111111',
+                     bg=row_bg, width=w, anchor='w', relief=tk.FLAT, bd=0
+                     ).pack(side=tk.LEFT, pady=1)
+
+    inner2.update_idletasks()
+    sc.config(scrollregion=sc.bbox('all'))
+
+    tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(6, 2))
+    tk.Label(page, text="* Case still pending. Lily's lawyer is a 6th grader.",
+             font=('Courier New', 7, 'italic'), fg='#888888', bg='white').pack()
+    tk.Label(page, text="CONFIDENTIAL — Disciplinary Records — Not for Distribution",
+             font=('Tahoma', 7, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
+
+
+# ─── Detention Log Viewer ─────────────────────────────────────────────────────
+def open_detention_logs():
+    """Displays a fake detention log text file with humorous incident reports."""
+    win = StyledWindow(root, "Detention_Logs.txt — Notepad", 580, 500)
+
+    # Notepad-style toolbar
+    menubar = tk.Frame(win.content, bg='#f0f0f0', relief=tk.FLAT)
+    menubar.pack(fill=tk.X)
+    for lbl in ["File", "Edit", "Format", "View", "Help"]:
+        tk.Label(menubar, text=lbl, font=('Tahoma', 8), fg='#000000',
+                 bg='#f0f0f0', padx=6, pady=2).pack(side=tk.LEFT)
+
+    tk.Frame(win.content, bg='#c0c0c0', height=1).pack(fill=tk.X)
+
+    # Text area
+    txt_frame = tk.Frame(win.content, bg='white')
+    txt_frame.pack(fill=tk.BOTH, expand=True)
+
+    txt = tk.Text(txt_frame, font=('Courier New', 8), bg='white', fg='#000000',
+                  relief=tk.FLAT, bd=0, wrap=tk.WORD,
+                  padx=8, pady=6, state=tk.NORMAL)
+    vsb3 = tk.Scrollbar(txt_frame, orient='vertical', command=txt.yview)
+    txt.configure(yscrollcommand=vsb3.set)
+    vsb3.pack(side=tk.RIGHT, fill=tk.Y)
+    txt.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+    log_content = """\
+LEGS ACADEMY — DETENTION LOG
+Academic Year: 2024-25
+Maintained by: Vice Principal Henderson (and his very tired pen)
+============================================================
+
+DATE:    Mon, Sep 09, 2024 — 3:15 PM
+STUDENT: Tyler Pranksworth, Grade 7
+TEACHER: Mrs. Flannery (History)
+OFFENSE: Drew a moustache on every single face in the history textbook,
+          including the maps. Magellan now has a goatee.
+PUNISHMENT: 1 hour. Must write "I will not redecorate historical figures"
+             100 times. Tried to write it in calligraphy. Points for style,
+             zero for judgment.
+------------------------------------------------------------
+
+DATE:    Wed, Sep 18, 2024 — 3:15 PM
+STUDENT: Cody McSneeze, Grade 6
+TEACHER: Mr. Plunkett (Science)
+OFFENSE: Claimed his cold was "a science experiment in airborne particle
+          distribution." Distributed particles over three rows of students.
+PUNISHMENT: 45 min + must bring tissues tomorrow. Brought 47 boxes.
+             We're covered for winter.
+------------------------------------------------------------
+
+DATE:    Fri, Oct 04, 2024 — 3:15 PM
+STUDENT: Emma Giggleston, Grade 8
+TEACHER: Ms. Pringle (English)
+OFFENSE: Rewrote the weekly vocabulary quiz as a rap song and performed
+          it. Got every answer correct. Still in detention.
+          (Ms. Pringle is still humming it. Do not tell Emma.)
+PUNISHMENT: 1 hour. Used the time to write a second rap. Principal rated
+             it 8/10. This stays off the record. Except it is on the record.
+------------------------------------------------------------
+
+DATE:    Tue, Oct 22, 2024 — 3:15 PM
+STUDENT: Jake Kim, Grade 7
+TEACHER: Coach Bellamy (P.E.)
+OFFENSE: Convinced the class that "competitive sitting" was an Olympic
+          sport and held trials. 28 students participated. 2 fell asleep.
+          Coach Bellamy nearly joined them.
+PUNISHMENT: 1 hour. Sat very still. Irony noted by all.
+------------------------------------------------------------
+
+DATE:    Thu, Nov 07, 2024 — 3:15 PM
+STUDENT: Sophie Bananapeels, Grade 6
+TEACHER: Mr. Fitch (Math)
+OFFENSE: Replaced all the 7s on the classroom number line with drawings
+          of a chicken. 7 is now a chicken. Students cannot unlearn this.
+          Three kids now say "chicken" instead of 7 on tests.
+PUNISHMENT: 1 hour. Must make new number line. Made one with better
+             chickens. It was confiscated. Then laminated. It's in the
+             teacher's lounge now.
+------------------------------------------------------------
+
+DATE:    Mon, Dec 02, 2024 — 3:15 PM
+STUDENT: Benny Noodlestir, Grade 7
+TEACHER: Mrs. Flannery (History)
+OFFENSE: During silent reading, communicated entirely using hand puppets
+          made from his socks. Conducted a full interview with 'Señor Left
+          Sock' regarding the fall of the Roman Empire. Actually pretty
+          historically accurate.
+PUNISHMENT: 1 hour. Señor Left Sock was confiscated pending review.
+------------------------------------------------------------
+
+DATE:    Wed, Jan 15, 2025 — 3:15 PM
+STUDENT: Tyler Pranksworth, Grade 7
+TEACHER: Multiple (class-wide incident)
+OFFENSE: Organised what he called a "Flash Freeze" — at exactly 10:00 AM
+          every student stopped moving simultaneously for 60 seconds.
+          Four teachers checked for a gas leak. Fire dept was not called.
+          (It was a close call.)
+PUNISHMENT: 2 hours. Tyler sat completely still in detention as a
+             "personal record attempt." Made it 3 minutes. New record.
+------------------------------------------------------------
+
+DATE:    Fri, Feb 14, 2025 — 3:15 PM
+STUDENT: Lily Butterfingers, Grade 6
+TEACHER: Ms. Pringle (English)
+OFFENSE: Valentine's Day. Lily made 32 valentines. Each one individually
+          glittered. The glitter is still in the HVAC system.
+          Maintenance says it will shimmer until roughly 2031.
+PUNISHMENT: 1 hour. Spent 58 minutes apologising. 2 minutes crying.
+             Glitter everywhere regardless.
+------------------------------------------------------------
+
+DATE:    Tue, Mar 11, 2025 — 3:15 PM
+STUDENT: Marcus Loudmouth, Grade 8
+TEACHER: Mr. Plunkett (Science)
+OFFENSE: Tested acoustic properties of cafeteria by yelling "ECHO!"
+          repeatedly until the jello on 14 trays achieved visible
+          resonance. Considered noteworthy by Physics dept. Still detention.
+PUNISHMENT: 1 hour. Was very quiet. Suspiciously quiet.
+------------------------------------------------------------
+
+NOTE FROM V.P. HENDERSON:
+  If Tyler Pranksworth appears in this log one more time, we are giving
+  him his own column. Possibly his own ZIP code.
+
+  Also: whoever replaced the staff room sugar with salt AGAIN, we know
+  it was not Tyler this time. The forensic evidence points to 6th grade.
+  You know who you are. The coffee knows who you are.
+
+============================================================
+END OF LOG — Page 1 of 1
+Printed: 2025-05-22   [CONFIDENTIAL — Staff Use Only]
+"""
+    txt.insert(tk.END, log_content)
+    txt.config(state=tk.DISABLED)
+
+    status = tk.Label(win.content,
+                      text="Ln 1, Col 1    UTF-8    Windows (CRLF)",
+                      font=('Tahoma', 7), bg='#f0f0f0', fg='#444444',
+                      anchor='w', relief=tk.SUNKEN, bd=1)
+    status.pack(fill=tk.X, side=tk.BOTTOM)
 
 # ─── Grade Portal ─────────────────────────────────────────────────────────────
 def open_grade_portal():
@@ -494,9 +796,9 @@ def show_desktop():
     ICON_SPACING= 102
 
     icon_defs = [
-        ("📁", "School\nBudget.xlsx",  lambda: open_dummy_file("School_Budget.xlsx")),
-        ("📄", "Suspension\nList.pdf", lambda: open_dummy_file("Suspension_List.pdf")),
-        ("📝", "Detention\nLogs.txt",  lambda: open_dummy_file("Detention_Logs.txt")),
+        ("📁", "School\nBudget.xlsx",  open_school_budget),
+        ("📄", "Suspension\nList.pdf", open_suspension_list),
+        ("📝", "Detention\nLogs.txt",  open_detention_logs),
         ("🌐", "Grade\nPortal",        open_grade_portal),
     ]
 
