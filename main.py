@@ -302,16 +302,16 @@ def open_school_budget():
 # ─── Suspension List Viewer ───────────────────────────────────────────────────
 def open_suspension_list():
     """Displays a fake suspension list PDF viewer with humorous entries."""
-    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 696, 600)
+    win = StyledWindow(root, "Suspension_List.pdf — Adobe Acrobat Reader", 836, 850)
 
     # PDF toolbar mock
     toolbar = tk.Frame(win.content, bg='#4a4a4a', height=28)
     toolbar.pack(fill=tk.X)
     toolbar.pack_propagate(False)
     for lbl in ["File", "Edit", "View", "Tools", "Help"]:
-        tk.Label(toolbar, text=lbl, font=('Tahoma', 12), fg='#dddddd',
+        tk.Label(toolbar, text=lbl, font=('Tahoma', 14), fg='#dddddd',
                  bg='#4a4a4a', padx=6).pack(side=tk.LEFT)
-    tk.Label(toolbar, text="Page: 1 / 1", font=('Tahoma', 12),
+    tk.Label(toolbar, text="Page: 1 / 1", font=('Tahoma', 14),
              fg='#dddddd', bg='#4a4a4a').pack(side=tk.RIGHT, padx=8)
 
     # PDF body
@@ -322,20 +322,32 @@ def open_suspension_list():
                     highlightthickness=1, highlightbackground='#555555')
     page.pack(padx=20, pady=8, fill=tk.BOTH, expand=True)
 
-    tk.Label(page, text="LEGS ACADEMY", font=('Georgia', 18, 'bold'),
+    tk.Label(page, text="LEGS ACADEMY", font=('Georgia', 20, 'bold'),
              fg='#1a1a6e', bg='white').pack(pady=(14, 0))
     tk.Label(page, text="OFFICIAL SUSPENSION REGISTER — 2024-25 School Year",
-             font=('Georgia', 13, 'bold'), fg='#1a1a6e', bg='white').pack()
+             font=('Georgia', 15, 'bold'), fg='#1a1a6e', bg='white').pack()
     tk.Frame(page, bg='#1a1a6e', height=2).pack(fill=tk.X, padx=20, pady=6)
 
-    headers = ["#", "Student Name", "Grade", "Date", "Reason", "Days"]
-    widths  = [3,    18,              6,       10,     36,        5]
+    # Column character-widths for fixed columns; Reason fills remaining space
+    FIXED_HDRS   = ["#", "Student Name", "Grade", "Date"]
+    FIXED_WIDTHS = [3,    18,              6,       10   ]
+    HDR_FONT     = ('Courier New', 13, 'bold')
+    BODY_FONT    = ('Courier New', 13)
+    REASON_WRAP  = 390   # pixel budget for the Reason column
+
     hrow = tk.Frame(page, bg='#1a1a6e')
     hrow.pack(fill=tk.X, padx=20)
-    for h, w in zip(headers, widths):
-        tk.Label(hrow, text=h, font=('Courier New', 11, 'bold'),
+    for h, w in zip(FIXED_HDRS, FIXED_WIDTHS):
+        tk.Label(hrow, text=h, font=HDR_FONT,
                  fg='white', bg='#1a1a6e', width=w, anchor='w'
                  ).pack(side=tk.LEFT)
+    # Pack Days to the RIGHT first so Reason can fill the space in-between
+    tk.Label(hrow, text="Days", font=HDR_FONT,
+             fg='white', bg='#1a1a6e', width=5, anchor='w'
+             ).pack(side=tk.RIGHT)
+    tk.Label(hrow, text="Reason", font=HDR_FONT,
+             fg='white', bg='#1a1a6e', anchor='w'
+             ).pack(side=tk.LEFT, fill=tk.X, expand=True)
 
     entries = [
         ("01", "Tyler Pranksworth",   "7th", "Sep 04", "Released 47 frogs into gym during assembly",          "3"),
@@ -352,33 +364,34 @@ def open_suspension_list():
         ("12", "Noah Loudsnore",      "8th", "Mar 01", "Fell asleep in gym, snored so loud class was dismissed","1"),
     ]
 
-    scroll_f = tk.Frame(page, bg='white')
-    scroll_f.pack(fill=tk.BOTH, expand=True, padx=20, pady=4)
-    sc = tk.Canvas(scroll_f, bg='white', highlightthickness=0)
-    sb2 = tk.Scrollbar(scroll_f, orient='vertical', command=sc.yview)
-    sc.configure(yscrollcommand=sb2.set)
-    sb2.pack(side=tk.RIGHT, fill=tk.Y)
-    sc.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
-    inner2 = tk.Frame(sc, bg='white')
-    sc.create_window((0, 0), window=inner2, anchor='nw')
+    # Plain frame — dialog is tall enough to show all rows without scrolling
+    rows_frame = tk.Frame(page, bg='white')
+    rows_frame.pack(fill=tk.X, padx=20, pady=4)
 
     for idx, (num, name, grade, date, reason, days) in enumerate(entries):
         row_bg = '#f0f4ff' if idx % 2 == 0 else 'white'
-        rf = tk.Frame(inner2, bg=row_bg)
+        rf = tk.Frame(rows_frame, bg=row_bg)
         rf.pack(fill=tk.X)
-        for val, w in zip([num, name, grade, date, reason, days], widths):
-            tk.Label(rf, text=val, font=('Courier New', 11), fg='#111111',
-                     bg=row_bg, width=w, anchor='w', relief=tk.FLAT, bd=0
-                     ).pack(side=tk.LEFT, pady=1)
-
-    inner2.update_idletasks()
-    sc.config(scrollregion=sc.bbox('all'))
+        # Fixed-width columns: #, Name, Grade, Date
+        for val, w in zip([num, name, grade, date], FIXED_WIDTHS):
+            tk.Label(rf, text=val, font=BODY_FONT, fg='#111111',
+                     bg=row_bg, width=w, anchor='nw', relief=tk.FLAT, bd=0
+                     ).pack(side=tk.LEFT, pady=2)
+        # Days on the right (mirrors header)
+        tk.Label(rf, text=days, font=BODY_FONT, fg='#111111',
+                 bg=row_bg, width=5, anchor='nw', relief=tk.FLAT, bd=0
+                 ).pack(side=tk.RIGHT, pady=2)
+        # Reason fills remaining width and wraps as needed
+        tk.Label(rf, text=reason, font=BODY_FONT, fg='#111111',
+                 bg=row_bg, anchor='nw', justify=tk.LEFT, relief=tk.FLAT, bd=0,
+                 wraplength=REASON_WRAP
+                 ).pack(side=tk.LEFT, fill=tk.X, expand=True, pady=2)
 
     tk.Frame(page, bg='#1a1a6e', height=1).pack(fill=tk.X, padx=20, pady=(6, 2))
     tk.Label(page, text="* Case still pending. Lily's lawyer is a 6th grader.",
-             font=('Courier New', 11, 'italic'), fg='#888888', bg='white').pack()
+             font=('Courier New', 13, 'italic'), fg='#888888', bg='white').pack()
     tk.Label(page, text="CONFIDENTIAL — Disciplinary Records — Not for Distribution",
-             font=('Tahoma', 11, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
+             font=('Tahoma', 13, 'italic'), fg='#aaaaaa', bg='white').pack(pady=(0, 8))
 
 
 # ─── Detention Log Viewer ─────────────────────────────────────────────────────
