@@ -213,8 +213,9 @@ def check_computer_login():
     if comp_pass_entry.get().strip().lower() == COMP_PASSWORD:
         show_desktop()
     else:
-        messagebox.showerror("Access Denied", "Incorrect Password.")
+        bg.itemconfig(login_error_text, text="⚠️  Access Denied: Incorrect Password.")
         comp_pass_entry.delete(0, tk.END)
+        comp_pass_entry.focus_set()
 
 # ─── School Budget Viewer ────────────────────────────────────────────────────
 def open_school_budget():
@@ -571,17 +572,20 @@ def show_grade_modifier_interface():
 
     tk.Frame(win.content, bg='#b8a888', height=1).pack(fill=tk.X, padx=15, pady=8)
 
+    status_lbl = tk.Label(win.content, text="", font=('Tahoma', 10, 'bold'),
+                          fg='#a01818', bg=win.WIN_BG)
+    status_lbl.pack(pady=4)
+
     def submit_grades():
         if all(dropdowns[s].get() == "A" for s in student_grades):
-            messagebox.showinfo("Database Sync",
-                "Changes committed successfully. Permanent records overwritten.",
-                parent=win)
-            win.destroy()
-            trigger_win_condition()
+            status_lbl.config(text="🔄  Syncing with database... Please wait.", fg='#246e28')
+            btn.unbind('<Button-1>')
+            def success_trigger():
+                win.destroy()
+                trigger_win_condition()
+            win.after(1200, success_trigger)
         else:
-            messagebox.showerror("Sync Failed",
-                "Error: Student GPA remains below passing threshold.",
-                parent=win)
+            status_lbl.config(text="⚠️  Sync Failed: Student GPA remains below passing threshold.", fg='#a01818')
 
     btn = os_button(win.content, "  Commit Changes to Server  ", submit_grades,
                     font=('Tahoma', 11, 'bold'),
@@ -968,6 +972,9 @@ make_login_btn()
 # "or press Enter" hint
 bg.create_text(SW//2, py+248, text="or press Enter",
                font=('Tahoma', 8, 'italic'), fill='#3a6a9a')
+
+login_error_text = bg.create_text(SW//2, py+285, text="",
+                                  font=('Tahoma', 10, 'bold'), fill='#ff8888')
 
 # ── Bottom status bar ─────────────────────────────────────────────────────────
 fill_gradient(bg, 0, SH-48, SW, SH, '#010818', '#040e24', steps=48)
