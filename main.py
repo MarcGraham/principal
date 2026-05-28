@@ -537,7 +537,11 @@ def open_grade_portal():
                                  parent=win)
             entry.delete(0, tk.END)
             # Re-establish focus after native messagebox releases
-            win.after(100, entry.focus_force)
+            def restore_focus():
+                win.lift()
+                win.focus_force()
+                entry.focus_force()
+            win.after(100, restore_focus)
 
     win.bind('<Return>', lambda e: verify())
     btn = os_button(win.content, "  Authenticate  ", verify,
