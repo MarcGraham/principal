@@ -609,8 +609,101 @@ def show_grade_modifier_interface():
     btn.pack(pady=4)
 
 # ─── Win Condition ────────────────────────────────────────────────────────────
+class MatrixRain:
+    def __init__(self, canvas, width, height):
+        self.c = canvas
+        self.w = width
+        self.h = height
+
+        # Grid columns: each spaced by 18 pixels
+        self.cols = width // 18
+        self.drops = [random.randint(-40, 0) * 15 for _ in range(self.cols)]
+        self.speeds = [random.randint(12, 28) for _ in range(self.cols)]
+        self.chars = []
+
+    def update(self):
+        new_chars = []
+        for cid, col, age in self.chars:
+            age += 1
+            if age > 14:
+                self.c.delete(cid)
+            else:
+                # Organic fading effect: bright white -> vibrant matrix green -> deep dark green
+                if age < 2:
+                    color = '#ffffff'
+                elif age < 5:
+                    color = '#00ff41'
+                elif age < 9:
+                    color = '#00aa30'
+                else:
+                    color = '#002500'
+                self.c.itemconfig(cid, fill=color)
+                new_chars.append((cid, col, age))
+        self.chars = new_chars
+
+        for i in range(self.cols):
+            self.drops[i] += self.speeds[i]
+            if self.drops[i] > self.h + 50:
+                self.drops[i] = random.randint(-15, 0) * 15
+                self.speeds[i] = random.randint(12, 28)
+
+            if self.drops[i] > 0 and random.random() > 0.15:
+                cx = i * 18 + 9
+                cy = self.drops[i]
+                # Choice of binary and matrix-like ascii characters
+                char = random.choice('010101ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*')
+                cid = self.c.create_text(cx, cy, text=char, fill='#ffffff',
+                                         font=('Courier New', 11, 'bold'))
+                self.chars.append((cid, i, 0))
+
+        # Keep winning text elements raised above the digital rain
+        self.c.tag_raise('win_text')
+        self.c.after(45, self.update)
+
+
+def play_win_fanfare():
+    """Synthesizes a retro 8-bit winning arpeggio and plays it asynchronously."""
+    import math as _math
+    import struct as _struct
+    import wave as _wave
+    import subprocess as _subprocess
+    import sys as _sys
+
+    notes = [523.25, 659.25, 783.99, 1046.50]  # C5, E5, G5, C6 arpeggio
+    durations = [0.15, 0.15, 0.15, 0.50]
+    sample_rate = 8000
+    audio_data = bytearray()
+
+    for freq, dur in zip(notes, durations):
+        num_samples = int(sample_rate * dur)
+        for i in range(num_samples):
+            # Square wave for authentic retro 8-bit chip-tune sound
+            t = i / sample_rate
+            cycle = t * freq
+            val = 127 if (cycle - _math.floor(cycle)) < 0.5 else -128
+            audio_data.append(val + 128)
+
+    wav_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "win.wav")
+    try:
+        with _wave.open(wav_path, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(1)
+            w.setframerate(sample_rate)
+            w.writeframes(audio_data)
+
+        if _sys.platform == "darwin":
+            _subprocess.Popen(["afplay", wav_path], stdout=_subprocess.DEVNULL, stderr=_subprocess.DEVNULL)
+        elif _sys.platform == "win32":
+            import winsound
+            winsound.PlaySound(wav_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+        else:
+            _subprocess.Popen(["aplay", wav_path], stdout=_subprocess.DEVNULL, stderr=_subprocess.DEVNULL)
+    except Exception as _err:
+        print(f"[AUDIO] Could not play fanfare: {_err}")
+
+
 def trigger_win_condition():
-    """Unlocks the door and displays the final win graphic."""
+    """Unlocks the door, plays win fanfare, and runs animated Matrix digital rain."""
     for w in root.winfo_children():
         w.destroy()
     root.configure(bg='#000000')
@@ -618,20 +711,23 @@ def trigger_win_condition():
     SH = root.winfo_screenheight()
     c = tk.Canvas(root, bg='#000000', highlightthickness=0)
     c.pack(fill=tk.BOTH, expand=True)
-    fill_gradient(c, 0, 0, SW, SH, '#000000', '#061206', steps=80)
-    # Matrix rain dots
-    rng2 = random.Random(7)
-    for _ in range(120):
-        c.create_text(rng2.randint(0, SW), rng2.randint(0, SH),
-                      text=rng2.choice('01'), fill='#003300',
-                      font=('Courier New', 10))
-    shadow_text(c, SW//2, SH//2-50, text="SYSTEM OVERRIDE",
-                font=('Courier New', 44, 'bold'), fill='#00ff41')
-    shadow_text(c, SW//2, SH//2+30, text="EXIT DOOR UNLOCKED",
-                font=('Courier New', 30), fill='#00cc33')
+
+    # Animated Matrix rain screensaver
+    rain = MatrixRain(c, SW, SH)
+    rain.update()
+
+    # SYSTEM OVERRIDE HUD (always layered on top of rain with tag 'win_text')
+    shadow_text(c, SW//2, SH//2-60, text="SYSTEM OVERRIDE",
+                font=('Courier New', 46, 'bold'), fill='#00ff41', tags='win_text')
+    shadow_text(c, SW//2, SH//2+20, text="EXIT DOOR UNLOCKED",
+                font=('Courier New', 32, 'bold'), fill='#00cc33', tags='win_text')
+
     door_lock.on()
     root.unbind('<Return>')
     root.focus_force()
+
+    # Play retro 8-bit arpeggio fanfare asynchronously
+    play_win_fanfare()
 
 # ─── Desktop Cloud Helper ─────────────────────────────────────────────────────
 import math as _math
