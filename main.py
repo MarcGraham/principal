@@ -110,9 +110,19 @@ class StyledWindow(tk.Toplevel):
         self.content.pack(fill=tk.BOTH, expand=True, padx=3, pady=(0, 3))
         self.transient(parent)
         self.grab_set()
-        # Force OS-level keyboard focus so global shortcuts (like GM backdoor) work
-        self.after(100, self.focus_force)
-        self.bind('<Button-1>', lambda e: self.focus_force())
+        # Force OS-level keyboard focus on the correct widget so global shortcuts work
+        self.after(100, self._auto_focus)
+        self.bind('<Button-1>', lambda e: self._auto_focus())
+
+    def _auto_focus(self, event=None):
+        try:
+            curr = self.focus_get()
+            if curr and curr != self:
+                curr.focus_force()
+            else:
+                self.focus_force()
+        except Exception:
+            self.focus_force()
 
     def _draw_bar(self, e=None):
         tc = self._tc
