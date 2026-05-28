@@ -542,7 +542,7 @@ def open_grade_portal():
                      highlightcolor='#6ab0ff')
     entry.pack(pady=8)
 
-    err_lbl = tk.Label(win.content, text="", font=('Tahoma', 9, 'bold'),
+    err_lbl = tk.Label(win.content, text="", font=('Tahoma', 13, 'bold'),
                        fg='#a01818', bg=win.WIN_BG)
     err_lbl.pack(pady=(0, 4))
 
@@ -594,7 +594,7 @@ def show_grade_modifier_interface():
 
     tk.Frame(win.content, bg='#b8a888', height=1).pack(fill=tk.X, padx=15, pady=8)
 
-    status_lbl = tk.Label(win.content, text="", font=('Tahoma', 10, 'bold'),
+    status_lbl = tk.Label(win.content, text="", font=('Tahoma', 14, 'bold'),
                           fg='#a01818', bg=win.WIN_BG)
     status_lbl.pack(pady=4)
 
@@ -1164,7 +1164,7 @@ bg.create_text(SW//2, py+248, text="or press Enter",
                font=('Tahoma', 8, 'italic'), fill='#3a6a9a')
 
 login_error_text = bg.create_text(SW//2, py+285, text="",
-                                  font=('Tahoma', 10, 'bold'), fill='#ff8888')
+                                  font=('Tahoma', 14, 'bold'), fill='#ff8888')
 
 # ── Bottom status bar ─────────────────────────────────────────────────────────
 fill_gradient(bg, 0, SH-48, SW, SH, '#010818', '#040e24', steps=48)
