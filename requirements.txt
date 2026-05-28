@@ -1,0 +1,16 @@
+# ── GUI & Image support ───────────────────────────────────────────────────────
+# Provides image scaling fallback capabilities
+Pillow>=10.0.0
+
+# ── Raspberry Pi GPIO Control ─────────────────────────────────────────────────
+# Standard modern hardware control API for Raspberry Pi
+gpiozero>=2.0
+
+# ── Note on System Dependencies ───────────────────────────────────────────────
+# Some libraries must be installed via your system package manager (apt) on Linux:
+#
+# 1. Tkinter (Standard GUI Library):
+#    sudo apt install python3-tk
+#
+# 2. Pi 5 GPIO Backend (Kernel-level access for Raspberry Pi 5):
+#    sudo apt install python3-lgpio
