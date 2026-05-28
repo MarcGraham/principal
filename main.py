@@ -102,9 +102,12 @@ def gm_reset_trigger(event):
             print("[GM] Reset backdoor triggered successfully. Restarting game...")
             # 1. Relock the door maglock
             door_lock.off()
-            # 2. Restart the current Python process cleanly
+            # 2. Spawn a completely fresh process asynchronously
+            import subprocess as _subprocess
             python = _sys.executable
-            _os.execl(python, python, *_sys.argv)
+            _subprocess.Popen([python] + _sys.argv)
+            # 3. Cleanly exit the current program
+            root.destroy()
 
 # ─── Custom Styled Dialog ─────────────────────────────────────────────────────
 class StyledWindow(tk.Toplevel):
