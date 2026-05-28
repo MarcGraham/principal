@@ -629,6 +629,8 @@ def trigger_win_condition():
     shadow_text(c, SW//2, SH//2+30, text="EXIT DOOR UNLOCKED",
                 font=('Courier New', 30), fill='#00cc33')
     door_lock.on()
+    root.unbind('<Return>')
+    root.focus_force()
 
 # ─── Desktop Cloud Helper ─────────────────────────────────────────────────────
 import math as _math
