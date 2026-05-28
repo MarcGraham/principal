@@ -3,7 +3,8 @@
 > [!IMPORTANT]
 > **OPERATIONAL SUMMARY (READ FIRST)**
 > * **Display Mode:** This application runs in **Immersive Fullscreen Mode** by default on all platforms. Keyboard focus is held so players cannot escape or access the underlying operating system.
-> * **Game Master Escape Backdoor:** To exit the application at any time, hold **`Control + Option`** (or **`Control + Alt`**) and tap the **`Escape`** key **3 times quickly (in under 1.5 seconds)**. This backdoor is active at all times, including on password entry screens, modifier dialogs, and the final win/lose screens.
+> * **Game Master Escape Backdoor:** To exit the application at any time, hold **`Control + Option`** (or **`Control + Alt`**) and tap the **`Escape`** key **3 times quickly (in under 1.5 seconds)**. Active at all times, including on win/lose screens.
+> * **Game Master Reset Backdoor:** To restart/reset the game at any time for another play, hold **`Control + Option`** (or **`Control + Alt`**) and tap the **`R`** key **3 times quickly (in under 1.5 seconds)**. This relocks the physical maglock, clears any lockout counters, and restarts the game cleanly.
 > * **System Passwords:**
 >   * **Computer Lock Screen Login:** `admin`
 >   * **District Grades Portal gateway Key:** `override`

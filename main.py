@@ -3,6 +3,7 @@ from tkinter import messagebox
 import time, random
 from datetime import datetime
 import os as _os
+import sys as _sys
 try:
     from PIL import Image as _PILImage, ImageTk as _PILImageTk
     _PIL_OK = True
@@ -87,6 +88,24 @@ def gm_backdoor_trigger(event):
             print("[GM] Backdoor triggered successfully. Exiting program.")
             root.destroy()
 
+reset_timestamps = []
+
+def gm_reset_trigger(event):
+    """Hold Control+Option/Alt, tap R 3× quickly (< 1.5 s) to restart the game process."""
+    global reset_timestamps
+    current_time = time.time()
+    reset_timestamps.append(current_time)
+    if len(reset_timestamps) > 3:
+        reset_timestamps.pop(0)
+    if len(reset_timestamps) == 3:
+        if reset_timestamps[2] - reset_timestamps[0] < 1.5:
+            print("[GM] Reset backdoor triggered successfully. Restarting game...")
+            # 1. Relock the door maglock
+            door_lock.off()
+            # 2. Restart the current Python process cleanly
+            python = _sys.executable
+            _os.execl(python, python, *_sys.argv)
+
 # ─── Custom Styled Dialog ─────────────────────────────────────────────────────
 class StyledWindow(tk.Toplevel):
     WIN_BG = '#f2ede0'
@@ -111,7 +130,8 @@ class StyledWindow(tk.Toplevel):
         self.content = tk.Frame(self, bg=self.WIN_BG)
         self.content.pack(fill=tk.BOTH, expand=True, padx=3, pady=(0, 3))
         self.transient(parent)
-        self.grab_set()
+        if _sys.platform != 'darwin':
+            self.grab_set()
         # Force OS-level keyboard focus on the correct widget so global shortcuts work
         self.after(100, self._auto_focus)
         self.bind('<Button-1>', lambda e: self._auto_focus())
@@ -1175,7 +1195,15 @@ shadow_text(bg, SW//2, SH-24,
 
 # ─── Key Bindings ─────────────────────────────────────────────────────────────
 root.bind('<Return>',                lambda e: check_computer_login())
-root.bind_all('<Control-Option-Escape>', gm_backdoor_trigger)
-root.bind_all('<Control-Alt-Escape>',    gm_backdoor_trigger)   # macOS Alt alias
+root.bind_all('<Control-Option-Escape>',     gm_backdoor_trigger)
+root.bind_all('<Control-Alt-Escape>',        gm_backdoor_trigger)
+root.bind_all('<Control-Option-r>',          gm_reset_trigger)
+root.bind_all('<Control-Option-R>',          gm_reset_trigger)
+root.bind_all('<Control-Alt-r>',             gm_reset_trigger)
+root.bind_all('<Control-Alt-R>',             gm_reset_trigger)
+root.bind_all('<Control-Option-registered>', gm_reset_trigger)
+root.bind_all('<Control-Alt-registered>',    gm_reset_trigger)
+root.bind_all('<Control-Option-permille>',   gm_reset_trigger)
+root.bind_all('<Control-Alt-permille>',      gm_reset_trigger)
 
 root.mainloop()
