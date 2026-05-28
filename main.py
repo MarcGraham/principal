@@ -27,6 +27,7 @@ class MockGPIO:
         pass
 
 try:
+    # pyrefly: ignore [missing-import]
     from gpiozero import OutputDevice
     door_lock = OutputDevice(RELAY_PIN, active_high=True, initial_value=False)
     print(f"[GPIO] Real relay on BCM pin {RELAY_PIN} — running on Raspberry Pi")
