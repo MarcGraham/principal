@@ -38,6 +38,7 @@ except Exception as _gpio_err:
 # ─── Config ───────────────────────────────────────────────────────────────────
 COMP_PASSWORD    = "admin"
 PORTAL_PASSWORD  = "override"
+portal_attempts  = 0
 student_grades   = {"Math": "F", "History": "F", "Chemistry": "F"}
 escape_timestamps = []
 
@@ -548,13 +549,20 @@ def open_grade_portal():
     win.after(50, entry.focus_set)
 
     def verify():
+        global portal_attempts
         if entry.get().strip().lower() == PORTAL_PASSWORD:
             win.destroy()
             show_grade_modifier_interface()
         else:
-            err_lbl.config(text="⚠️  Invalid Encryption Key. Access Denied.")
-            entry.delete(0, tk.END)
-            entry.focus_set()
+            portal_attempts += 1
+            if portal_attempts >= 4:
+                win.destroy()
+                trigger_lose_condition()
+            else:
+                rem = 4 - portal_attempts
+                err_lbl.config(text=f"⚠️  Access Denied! Attempt {portal_attempts}/3 (Lockout in {rem}...)")
+                entry.delete(0, tk.END)
+                entry.focus_set()
 
     win.bind('<Return>', lambda e: verify())
     btn = os_button(win.content, "  Authenticate  ", verify,
@@ -610,10 +618,11 @@ def show_grade_modifier_interface():
 
 # ─── Win Condition ────────────────────────────────────────────────────────────
 class MatrixRain:
-    def __init__(self, canvas, width, height):
+    def __init__(self, canvas, width, height, theme='green'):
         self.c = canvas
         self.w = width
         self.h = height
+        self.theme = theme
 
         # Grid columns: each spaced by 18 pixels
         self.cols = width // 18
@@ -628,15 +637,15 @@ class MatrixRain:
             if age > 14:
                 self.c.delete(cid)
             else:
-                # Organic fading effect: bright white -> vibrant matrix green -> deep dark green
+                # Fading gradient according to theme
                 if age < 2:
                     color = '#ffffff'
                 elif age < 5:
-                    color = '#00ff41'
+                    color = '#ff2020' if self.theme == 'red' else '#00ff41'
                 elif age < 9:
-                    color = '#00aa30'
+                    color = '#aa1010' if self.theme == 'red' else '#00aa30'
                 else:
-                    color = '#002500'
+                    color = '#350000' if self.theme == 'red' else '#002500'
                 self.c.itemconfig(cid, fill=color)
                 new_chars.append((cid, col, age))
         self.chars = new_chars
@@ -650,13 +659,12 @@ class MatrixRain:
             if self.drops[i] > 0 and random.random() > 0.15:
                 cx = i * 18 + 9
                 cy = self.drops[i]
-                # Choice of binary and matrix-like ascii characters
                 char = random.choice('010101ABCDEFGHIJKLMNOPQRSTUVWXYZ!@#$%^&*')
                 cid = self.c.create_text(cx, cy, text=char, fill='#ffffff',
                                          font=('Courier New', 11, 'bold'))
                 self.chars.append((cid, i, 0))
 
-        # Keep winning text elements raised above the digital rain
+        # Keep winning/losing text elements raised above the digital rain
         self.c.tag_raise('win_text')
         self.c.after(45, self.update)
 
@@ -702,6 +710,47 @@ def play_win_fanfare():
         print(f"[AUDIO] Could not play fanfare: {_err}")
 
 
+def play_lose_sound():
+    """Synthesizes a retro 8-bit hazard alarm siren and plays it asynchronously."""
+    import math as _math
+    import struct as _struct
+    import wave as _wave
+    import subprocess as _subprocess
+    import sys as _sys
+
+    notes = [220, 180, 220, 180, 220, 180, 150]  # Hazard siren pitches
+    durations = [0.25, 0.25, 0.25, 0.25, 0.25, 0.25, 0.6]
+    sample_rate = 8000
+    audio_data = bytearray()
+
+    for freq, dur in zip(notes, durations):
+        num_samples = int(sample_rate * dur)
+        for i in range(num_samples):
+            t = i / sample_rate
+            cycle = t * freq
+            # Square wave for a dirty hazard buzzer sound
+            val = 127 if (cycle - _math.floor(cycle)) < 0.5 else -128
+            audio_data.append(val + 128)
+
+    wav_path = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "lose.wav")
+    try:
+        with _wave.open(wav_path, "wb") as w:
+            w.setnchannels(1)
+            w.setsampwidth(1)
+            w.setframerate(sample_rate)
+            w.writeframes(audio_data)
+
+        if _sys.platform == "darwin":
+            _subprocess.Popen(["afplay", wav_path], stdout=_subprocess.DEVNULL, stderr=_subprocess.DEVNULL)
+        elif _sys.platform == "win32":
+            import winsound
+            winsound.PlaySound(wav_path, winsound.SND_FILENAME | winsound.SND_ASYNC)
+        else:
+            _subprocess.Popen(["aplay", wav_path], stdout=_subprocess.DEVNULL, stderr=_subprocess.DEVNULL)
+    except Exception as _err:
+        print(f"[AUDIO] Could not play lose alarm: {_err}")
+
+
 def trigger_win_condition():
     """Unlocks the door, plays win fanfare, and runs animated Matrix digital rain."""
     for w in root.winfo_children():
@@ -712,8 +761,8 @@ def trigger_win_condition():
     c = tk.Canvas(root, bg='#000000', highlightthickness=0)
     c.pack(fill=tk.BOTH, expand=True)
 
-    # Animated Matrix rain screensaver
-    rain = MatrixRain(c, SW, SH)
+    # Animated Matrix rain screensaver (green theme)
+    rain = MatrixRain(c, SW, SH, theme='green')
     rain.update()
 
     # SYSTEM OVERRIDE HUD (always layered on top of rain with tag 'win_text')
@@ -728,6 +777,35 @@ def trigger_win_condition():
 
     # Play retro 8-bit arpeggio fanfare asynchronously
     play_win_fanfare()
+
+
+def trigger_lose_condition():
+    """Triggers the security breach lockdown screen with red Matrix rain."""
+    for w in root.winfo_children():
+        w.destroy()
+    root.configure(bg='#0a0000')
+    SW = root.winfo_screenwidth()
+    SH = root.winfo_screenheight()
+    c = tk.Canvas(root, bg='#0a0000', highlightthickness=0)
+    c.pack(fill=tk.BOTH, expand=True)
+
+    # Red Matrix digital rain screensaver
+    rain = MatrixRain(c, SW, SH, theme='red')
+    rain.update()
+
+    # SECURITY LOCKDOWN HUD (always layered on top of rain with tag 'win_text')
+    shadow_text(c, SW//2, SH//2-60, text="SECURITY BREACH DETECTED",
+                font=('Courier New', 42, 'bold'), fill='#ff2020', tags='win_text')
+    shadow_text(c, SW//2, SH//2+20, text="SYSTEM PERMANENTLY LOCKED",
+                font=('Courier New', 28, 'bold'), fill='#dddddd', tags='win_text')
+    shadow_text(c, SW//2, SH//2+80, text="District Security has been notified.",
+                font=('Courier New', 16, 'italic'), fill='#aa9999', tags='win_text')
+
+    root.unbind('<Return>')
+    root.focus_force()
+
+    # Play retro 8-bit hazard alarm sound
+    play_lose_sound()
 
 # ─── Desktop Cloud Helper ─────────────────────────────────────────────────────
 import math as _math
