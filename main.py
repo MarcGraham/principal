@@ -533,7 +533,8 @@ def open_grade_portal():
             show_grade_modifier_interface()
         else:
             messagebox.showerror("Security Alert",
-                                 "Invalid Encryption Key. Access Denied.")
+                                 "Invalid Encryption Key. Access Denied.",
+                                 parent=win)
             entry.delete(0, tk.END)
             # Re-establish focus chain after native messagebox releases the grab
             win.lift()
@@ -573,12 +574,14 @@ def show_grade_modifier_interface():
     def submit_grades():
         if all(dropdowns[s].get() == "A" for s in student_grades):
             messagebox.showinfo("Database Sync",
-                "Changes committed successfully. Permanent records overwritten.")
+                "Changes committed successfully. Permanent records overwritten.",
+                parent=win)
             win.destroy()
             trigger_win_condition()
         else:
             messagebox.showerror("Sync Failed",
-                "Error: Student GPA remains below passing threshold.")
+                "Error: Student GPA remains below passing threshold.",
+                parent=win)
 
     btn = os_button(win.content, "  Commit Changes to Server  ", submit_grades,
                     font=('Tahoma', 11, 'bold'),
