@@ -524,7 +524,12 @@ def open_grade_portal():
                      highlightthickness=2,
                      highlightbackground='#4a88d8',
                      highlightcolor='#6ab0ff')
-    entry.pack(pady=12)
+    entry.pack(pady=8)
+
+    err_lbl = tk.Label(win.content, text="", font=('Tahoma', 9, 'bold'),
+                       fg='#a01818', bg=win.WIN_BG)
+    err_lbl.pack(pady=(0, 4))
+
     win.after(50, entry.focus_set)
 
     def verify():
@@ -532,16 +537,9 @@ def open_grade_portal():
             win.destroy()
             show_grade_modifier_interface()
         else:
-            messagebox.showerror("Security Alert",
-                                 "Invalid Encryption Key. Access Denied.",
-                                 parent=win)
+            err_lbl.config(text="⚠️  Invalid Encryption Key. Access Denied.")
             entry.delete(0, tk.END)
-            # Re-establish focus after native messagebox releases
-            def restore_focus():
-                win.lift()
-                win.focus_force()
-                entry.focus_force()
-            win.after(100, restore_focus)
+            entry.focus_set()
 
     win.bind('<Return>', lambda e: verify())
     btn = os_button(win.content, "  Authenticate  ", verify,
