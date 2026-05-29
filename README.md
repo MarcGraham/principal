@@ -11,6 +11,76 @@
 
 ---
 
+## 🚀 Running the Application
+
+### 🍎 For macOS (Beginner-Friendly)
+
+If you are new to using the command line, follow these step-by-step instructions to get the game running on your Mac:
+
+1. **Open the Terminal App:**
+   * Press **`Command (⌘) + Spacebar`** on your keyboard to open Spotlight Search.
+   * Type **`Terminal`** and press **`Return`**. This opens a text-based terminal window.
+
+2. **Navigate to the Game Folder:**
+   * In the Terminal window, type **`cd `** (make sure to include the space after `cd`, but **do not** press Return yet).
+   * Open **Finder** and locate your project folder. Drag and drop the folder directly into the Terminal window. The Terminal will automatically fill in the folder's path.
+   * Press **`Return`** on your keyboard to navigate into the folder.
+
+3. **Install Dependencies:**
+   * Copy and paste the following command into your Terminal and press **`Return`**:
+     ```bash
+     pip3 install -r requirements.txt
+     ```
+   * *Note:* If you receive a `pip3: command not found` error, you may need to install Python first. You can download it from the official [Python website](https://www.python.org/downloads/mac-osx/).
+
+4. **Launch the Game:**
+   * Start the workstation simulation by running:
+     ```bash
+     python3 main.py
+     ```
+   * > [!IMPORTANT]
+     > The application will run in **Immersive Fullscreen Mode** and capture keyboard focus. 
+     > To exit the game at any time, hold **`Control`** and **`Option (⌥)`** and tap the **`Escape`** key **3 times quickly**.
+
+---
+
+### 🍓 For Raspberry Pi (Hardware Deployment)
+
+To deploy the game in a physical escape room setup on a Raspberry Pi:
+
+1. **Install System-Level Libraries:**
+   Tkinter and GPIO backends must interface with the Raspberry Pi OS kernel. Install the required system packages first:
+   ```bash
+   sudo apt update
+   sudo apt install -y python3-tk python3-gpiozero python3-lgpio python3-pil python3-pil.imagetk
+   ```
+
+2. **Navigate to the Folder:**
+   Change directory to the project location:
+   ```bash
+   cd /path/to/principal
+   ```
+
+3. **Install Python Packages:**
+   On recent Raspberry Pi OS editions (Bookworm and newer), external pip installations are managed. You can safely install the packages system-wide:
+   ```bash
+   pip3 install -r requirements.txt --break-system-packages
+   ```
+   Or set up a virtual environment utilizing your system-installed packages:
+   ```bash
+   python3 -m venv --system-site-packages venv
+   source venv/bin/activate
+   pip3 install -r requirements.txt
+   ```
+
+4. **Run the Game:**
+   Execute the application. The system will automatically detect the Pi environment and activate BCM GPIO Pin 18 to control your physical maglock relay:
+   ```bash
+   python3 main.py
+   ```
+
+---
+
 ## 🎮 Game Flow Overview
 
 The game simulates the "EduOS Professional" desktop on a high school principal's workstation. Players must navigate the desktop to hack into the District Grade Database and override a student's grades to trigger the physical door release.
