@@ -26,6 +26,18 @@ graph TD
     Win -->|Triggers Relay Pin 18| Door[🚪 EXIT DOOR UNLOCKED]
 ```
 
+### 🖥️ Start Menu Dialog
+* **Trigger:** Click the green **"Start"** button on the bottom left taskbar.
+* **Aesthetic:** Designed to mimic a classic **Windows XP-style dialog** box with a beige background (`#ece9d8`), a royal blue border, a blue gradient title bar, and a red Close button, but with *no icons*.
+* **Menu Options:** Pops open a text-only menu containing shortcuts for:
+  * **School Budget**
+  * **Suspension List**
+  * **Detention Logs**
+  * **Grade Portal**
+* **Dynamic Hover Effect:** Hovering over menu items highlights them in a solid blue background (`#316ac5`) with white text.
+* **Auto-Dismiss:** To ensure a clean and fluid experience, the Start Menu automatically closes when the player clicks *anywhere* else on the screen (such as the desktop wallpaper or taskbar) or activates a shortcut.
+* **Footer Actions:** Includes clean text buttons for **Log Off** and **Shut Down** at the bottom.
+
 ---
 
 ## 🔒 Escape & Lockout Mechanics

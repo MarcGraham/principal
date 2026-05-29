@@ -892,9 +892,135 @@ def update_clock(label):
     except tk.TclError:
         pass
 
+active_start_menu = None
+
+class StartMenu(tk.Toplevel):
+    def __init__(self, parent, start_button):
+        super().__init__(parent)
+        self.start_button = start_button
+        self.overrideredirect(True)
+        self.configure(bg='#ece9d8')
+        
+        w, h = 240, 210
+        sw = self.winfo_screenwidth()
+        sh = self.winfo_screenheight()
+        tbar_h = 44
+        x = 6
+        y = sh - tbar_h - h
+        self.geometry(f'{w}x{h}+{x}+{y}')
+        self.configure(highlightbackground='#0054e3', highlightthickness=3)
+        
+        # Title bar
+        self.title_bar = tk.Canvas(self, height=28, highlightthickness=0)
+        self.title_bar.pack(fill=tk.X, side=tk.TOP)
+        fill_gradient(self.title_bar, 0, 0, w, 28, '#002d9c', '#3282eb', steps=28)
+        self.title_bar.create_text(10, 14, text="Start Menu", fill='white', font=('Tahoma', 9, 'bold'), anchor='w')
+        
+        # Close button (XP style)
+        bx1, by1, bx2, by2 = w-24, 4, w-5, 24
+        self.title_bar.create_rectangle(bx1, by1, bx2, by2,
+                                         fill='#bb1f1f', outline='#6e0c0c',
+                                         tags=('cbtn', 'crect'))
+        self.title_bar.create_line(bx1+1, by1+1, bx2-1, by1+1,
+                                   fill='#ee6666', width=1, tags='cbtn')
+        self.title_bar.create_text((bx1+bx2)//2, (by1+by2)//2, text='✕',
+                                   fill='white', font=('Tahoma', 8, 'bold'), tags='cbtn')
+        self.title_bar.tag_bind('cbtn', '<Button-1>', lambda ev: self.close_menu())
+        
+        # Body frame
+        body = tk.Frame(self, bg='#ffffff')
+        body.pack(fill=tk.BOTH, expand=True, padx=3, pady=3)
+        
+        menu_items = [
+            ("School Budget",  open_school_budget),
+            ("Suspension List", open_suspension_list),
+            ("Detention Logs",  open_detention_logs),
+            ("Grade Portal",    open_grade_portal),
+        ]
+        
+        for name, cmd in menu_items:
+            item_frame = tk.Frame(body, bg='#ffffff', cursor='hand2')
+            item_frame.pack(fill=tk.X, pady=2, padx=4)
+            
+            lbl_name = tk.Label(item_frame, text=name, font=('Tahoma', 10, 'bold'), bg='#ffffff', fg='#333333')
+            lbl_name.pack(side=tk.LEFT, padx=10, pady=5)
+            
+            def on_enter(e, f=item_frame, l=lbl_name):
+                f.configure(bg='#316ac5')
+                l.configure(bg='#316ac5', fg='#ffffff')
+                
+            def on_leave(e, f=item_frame, l=lbl_name):
+                f.configure(bg='#ffffff')
+                l.configure(bg='#ffffff', fg='#333333')
+                
+            item_frame.bind('<Enter>', on_enter)
+            item_frame.bind('<Leave>', on_leave)
+            
+            def make_click(c):
+                return lambda e: self.trigger_action(c)
+                
+            item_frame.bind('<Button-1>', make_click(cmd))
+            lbl_name.bind('<Button-1>', make_click(cmd))
+            
+        # Footer
+        footer = tk.Frame(self, bg='#ece9d8', height=40)
+        footer.pack(fill=tk.X, side=tk.BOTTOM)
+        footer.pack_propagate(False)
+        
+        def click_logoff():
+            self.close_menu()
+            print("[OS] Log Off requested.")
+            parent.destroy()
+            
+        def click_shutdown():
+            self.close_menu()
+            print("[OS] Shut down requested.")
+            parent.destroy()
+
+        lbl_logoff = tk.Label(footer, text="Log Off", font=('Tahoma', 9, 'bold'), bg='#ece9d8', fg='#00156e', cursor='hand2')
+        lbl_logoff.pack(side=tk.LEFT, padx=15, pady=10)
+        lbl_logoff.bind('<Enter>', lambda e: lbl_logoff.config(fg='#316ac5'))
+        lbl_logoff.bind('<Leave>', lambda e: lbl_logoff.config(fg='#00156e'))
+        lbl_logoff.bind('<Button-1>', lambda e: click_logoff())
+        
+        lbl_shutdown = tk.Label(footer, text="Shut Down", font=('Tahoma', 9, 'bold'), bg='#ece9d8', fg='#00156e', cursor='hand2')
+        lbl_shutdown.pack(side=tk.RIGHT, padx=15, pady=10)
+        lbl_shutdown.bind('<Enter>', lambda e: lbl_shutdown.config(fg='#e03030'))
+        lbl_shutdown.bind('<Leave>', lambda e: lbl_shutdown.config(fg='#00156e'))
+        lbl_shutdown.bind('<Button-1>', lambda e: click_shutdown())
+        
+        # Setup dismiss binding
+        self.bind_id = None
+        self.after(10, self.setup_dismiss)
+
+    def setup_dismiss(self):
+        self.bind_id = self.master.bind_all('<Button-1>', self.check_dismiss, add="+")
+        
+    def check_dismiss(self, event):
+        if event.widget == self.start_button:
+            return
+        self.close_menu()
+
+    def trigger_action(self, cmd):
+        self.close_menu()
+        cmd()
+
+    def close_menu(self):
+        if self.bind_id:
+            try:
+                self.master.unbind_all('<Button-1>')
+            except Exception:
+                pass
+        global active_start_menu
+        active_start_menu = None
+        self.destroy()
+
 # ─── Desktop ─────────────────────────────────────────────────────────────────
 def show_desktop():
     """Clear lock screen and build the EduOS desktop."""
+    global active_start_menu
+    active_start_menu = None
+
     for w in root.winfo_children():
         w.destroy()
 
@@ -929,9 +1055,17 @@ def show_desktop():
         sb.create_text(SBW//2, SBH//2, text="⊞  Start",
                        fill='white', font=('Tahoma', 14, 'bold'))
 
+    def toggle_start_menu():
+        global active_start_menu
+        if active_start_menu:
+            active_start_menu.close_menu()
+        else:
+            active_start_menu = StartMenu(root, sb)
+
     draw_start()
     sb.bind('<Enter>', lambda e: draw_start(True))
     sb.bind('<Leave>', lambda e: draw_start(False))
+    sb.bind('<Button-1>', lambda e: toggle_start_menu())
     tb.create_window(6, TBAR_H//2, window=sb, anchor='w')
 
     # System tray clock
