@@ -31,9 +31,14 @@ try:
     # pyrefly: ignore [missing-import]
     from gpiozero import OutputDevice
     door_lock = OutputDevice(RELAY_PIN, active_high=True, initial_value=False)
-    print(f"[GPIO] Real relay on BCM pin {RELAY_PIN} — running on Raspberry Pi")
+    print(f"[HARDWARE] Real relay on BCM pin {RELAY_PIN} initialized (Raspberry Pi Mode)")
 except Exception as _gpio_err:
-    print(f"[GPIO] gpiozero not available ({_gpio_err}). Using mock.")
+    if _sys.platform == 'darwin':
+        print("[SYSTEM] Running on macOS: Simulating escape room hardware (relay simulated).")
+    elif _sys.platform == 'win32':
+        print("[SYSTEM] Running on Windows: Simulating escape room hardware (relay simulated).")
+    else:
+        print("[SYSTEM] GPIO hardware not detected. Running in Simulation Mode.")
     door_lock = MockGPIO(RELAY_PIN)
 
 # ─── Config ───────────────────────────────────────────────────────────────────
